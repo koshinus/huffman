@@ -1,10 +1,24 @@
-#include"huffman_tree.h"
+#include"suppory_func.h"
+#include <string.h>
 
-char * to_binary(char code, char *s, unsigned long code_size)
+char * to_binary(char *str, char code, unsigned long code_size)//FILE *f, char code, unsigned long code_size)
 {
+    //fprintf(f, "%c", code);
     for(int i = 0; i < code_size; i++)
-        s[7-i] = (char)((code >> i) & 1) + 48;
-	return s;
+    {
+        str[i] = (char) ((code >> i) & 1) + 48;
+    }
+	return str;
+}
+
+char * to_binary1(char *str, char code, unsigned long code_size)//FILE *f, char code, unsigned long code_size)
+{
+    //fprintf(f, "%c", code);
+    for(int i = 0; i < code_size; i++)
+    {
+        str[7 - i] = (char) ((code >> i) & 1) + 48;
+    }
+    return str;
 }
 
 int main()
@@ -19,7 +33,7 @@ int main()
         exit(1);
     }
 
-	//Getting frequency table from binary file
+	//Getting frequency table from text or binary file
 	unsigned long long buffer[BUFFER_SIZE];
     memset(buffer, 0, sizeof(unsigned long long)*BUFFER_SIZE);
     int c = EOF;
@@ -28,17 +42,17 @@ int main()
 	//https://en.wikipedia.org/wiki/Huffman_coding
     //Algorithm steps:
     huffman_encode_tree *het = make_tree(het, buffer, BUFFER_SIZE);			// 1
-    qsort(het->tree, het->nodes_number, sizeof(huffman_encode_node), cmp);
+    //qsort(het->tree, het->nodes_number, sizeof(huffman_encode_node), cmp);
 	//for(int i = 0; i < het->nodes_number; i++)
         //printf("%c: %ld\n", het->tree[i].symbol, het->tree[i].frequency);
 
     while(2*BUFFER_SIZE - het->nodes_number > 1)							// 2
     {
         short left = 0, right = 0;  					            	
-        left  = get_minimum(het);											//2.1
-        het->tree[ left].free_and_is_leaf |= 2;								//2.1
-        right = get_minimum(het);											//2.1
-        het->tree[right].free_and_is_leaf |= 2;								//2.1
+        left  = get_minimum(het);											// 2.1
+        het->tree[ left].free_and_is_leaf |= 2;								// 2.1
+        right = get_minimum(het);											// 2.1
+        het->tree[right].free_and_is_leaf |= 2;								// 2.1
         huffman_encode_node node
                 = make_node(het->tree[ left].frequency+						// 2.2
                             het->tree[right].frequency,						// 2.2
@@ -48,17 +62,28 @@ int main()
     }
 	
 	//Printing nodes frequency
+    /*
     for(int i = 0; i < het->nodes_number; i++)
         printf("%d: {%d, %d}->%ld\n", i, het->tree[i].left, het->tree[i].right, het->tree[i].frequency);
-	
+	*/
+
 	//Getting huffman codes for leafs
     get_huffman_codes_for_symbols(het, het->nodes_number-(short)1);
-	
+
+    //Visualize huffman tree
+    make_visualization(het);
+
 	//Printing huffman codes in binary view	    
 	for(int i = 0; i < het->nodes_number/2 + 1; i++)
 	{
-		char s[9] = {'-', '-', '-', '-', '-', '-', '-', '-', '\0'};
-        printf("%c: %s\n", (unsigned char)i, to_binary(het->tree[i].code, s, het->tree[i].code_size));
+		char s1[9] = {'-', '-', '-', '-', '-', '-', '-', '-', '\0'};
+        unsigned short code_size = het->tree[i].code_size;
+        unsigned char code = het->tree[i].code;
+        char *s = (char *)malloc(code_size + (short)1);
+        s[code_size] = '\0';
+        printf("%c(%d): %s\n", code, code_size, to_binary(s, code, code_size));
+        printf("%c(%d): %s\n", code, code_size, to_binary1(s1, code, code_size));
+        free(s);
 	}
     free(het);
     fclose(f);

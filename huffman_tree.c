@@ -4,7 +4,7 @@
 
 #include "huffman_tree.h"
 
-huffman_encode_node make_node(unsigned long freq, unsigned long cs, short l, short r, unsigned char leaf, unsigned char code, unsigned char symb)
+huffman_encode_node make_node(unsigned long freq, unsigned short cs, short l, short r, unsigned char leaf, unsigned char code, unsigned char symb)
 {
     huffman_encode_node node;
     node.frequency = freq;
@@ -38,10 +38,10 @@ void get_huffman_codes_for_symbols(huffman_encode_tree *het, short parent)
     if(l == -1) return;
     else
     {
-		het->tree[l].code_size = het->tree[parent].code_size+1;
+		het->tree[l].code_size = het->tree[parent].code_size + (short)1;
         het->tree[l].code = het->tree[parent].code << 1;
         get_huffman_codes_for_symbols(het, l);
-		het->tree[r].code_size = het->tree[parent].code_size+1;
+		het->tree[r].code_size = het->tree[parent].code_size + (short)1;
         het->tree[r].code = (het->tree[parent].code << 1) + 1;
         get_huffman_codes_for_symbols(het, r);
     }

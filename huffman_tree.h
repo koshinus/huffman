@@ -15,7 +15,7 @@
 typedef struct huffman_encode_node_
 {
     unsigned long frequency;		//Summary frequency of node
-	unsigned long code_size;		//Number of useful bits in "code" variable
+	unsigned short code_size;		//Number of useful bits in "code" variable
     short left, right;			    //Left and right parents of node
     unsigned char free_and_is_leaf,	//Variable in bynary format is equal:
 			                        //00000abc c = 1 if node is a leaf, else c = 0
@@ -32,7 +32,7 @@ typedef struct huffman_encode_tree_
 } huffman_encode_tree;
 
 long long cmp(huffman_encode_node *, huffman_encode_node *);
-huffman_encode_node make_node(unsigned long, unsigned long, short, short, unsigned char, unsigned char, unsigned char);
+huffman_encode_node make_node(unsigned long, unsigned short, short, short, unsigned char, unsigned char, unsigned char);
 huffman_encode_tree * make_tree(huffman_encode_tree *, unsigned long long *, unsigned short);
 short get_minimum(huffman_encode_tree *);
 void get_huffman_codes_for_symbols(huffman_encode_tree *, short);
