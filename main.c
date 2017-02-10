@@ -1,5 +1,4 @@
 #include"suppory_func.h"
-#include <string.h>
 
 char * to_binary(char *str, char code, unsigned long code_size)//FILE *f, char code, unsigned long code_size)
 {
@@ -38,15 +37,26 @@ int main()
     memset(buffer, 0, sizeof(unsigned long long)*BUFFER_SIZE);
     int c = EOF;
     while ((c = fgetc(f)) != EOF) buffer[(unsigned char)c]++;
-	
-	//https://en.wikipedia.org/wiki/Huffman_coding
+
+    unsigned short symbols_with_not_null_freq = 0;
+    for(int i = 0; i < BUFFER_SIZE; i++)
+    {
+        if (buffer[i] != 0) symbols_with_not_null_freq++;
+        printf("%d = %c - %lli | %d\n", i, (unsigned char)i, buffer[i], symbols_with_not_null_freq);
+    }
+    //printf("%d", symbols_with_not_null_freq);
+    //https://en.wikipedia.org/wiki/Huffman_coding
     //Algorithm steps:
-    huffman_encode_tree *het = make_tree(het, buffer, BUFFER_SIZE);			// 1
+    huffman_encode_tree *het = make_tree(het, buffer, symbols_with_not_null_freq);			// 1
+    for(int i = 0; i < het->nodes_number; i++)
+    {
+        printf("%d = %c - %li\n", (int)het->tree[i].symbol, het->tree[i].symbol, het->tree[i].frequency);
+    }
     //qsort(het->tree, het->nodes_number, sizeof(huffman_encode_node), cmp);
 	//for(int i = 0; i < het->nodes_number; i++)
         //printf("%c: %ld\n", het->tree[i].symbol, het->tree[i].frequency);
 
-    while(2*BUFFER_SIZE - het->nodes_number > 1)							// 2
+    while(2*symbols_with_not_null_freq - het->nodes_number > 1)							// 2
     {
         short left = 0, right = 0;  					            	
         left  = get_minimum(het);											// 2.1
@@ -74,7 +84,8 @@ int main()
     make_visualization(het);
 
 	//Printing huffman codes in binary view	    
-	for(int i = 0; i < het->nodes_number/2 + 1; i++)
+	/*
+    for(int i = 0; i < het->nodes_number/2 + 1; i++)
 	{
 		char s1[9] = {'-', '-', '-', '-', '-', '-', '-', '-', '\0'};
         unsigned short code_size = het->tree[i].code_size;
@@ -85,22 +96,9 @@ int main()
         printf("%c(%d): %s\n", code, code_size, to_binary1(s1, code, code_size));
         free(s);
 	}
+    */
     free(het);
     fclose(f);
 	
     return 0;
 }
-
-
-	//unsigned long long *buf = (unsigned long long *)malloc(sizeof(unsigned long long)*5);
-    //buf[0] = 12; buf[1] = 7; buf[2] = 6; buf[3] = 6; buf[4] = 5;
-
-    /*frequency
-    unsigned long check_res = 0;
-    for(int i = 0; i < 256; i++)
-    {
-        printf("%c - %d\n", (char)i, (int)buffer[i]);
-        check_res += buffer[i];
-    }
-    printf("%ld - number of reading bytes\n", check_res);
-	*/

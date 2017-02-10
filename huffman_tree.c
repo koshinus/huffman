@@ -21,8 +21,15 @@ huffman_encode_tree * make_tree(huffman_encode_tree *het, unsigned long long *fr
 {
     size_t size = offsetof(huffman_encode_tree, tree) + sizeof(huffman_encode_node) * (2 * table_size - 1);
     het = (huffman_encode_tree *) malloc(size);
-    for(int i = 0; i < table_size; i++)
-        het->tree[i] = make_node(frequency_table[i], 0, -1, -1, 1, 0, (unsigned char)i);
+    unsigned short tree_count = 0;
+    for(int i = 0; i < BUFFER_SIZE; i++)
+    {
+        if(frequency_table[i] != 0)
+        {
+            het->tree[tree_count] = make_node(frequency_table[i], 0, -1, -1, 1, 0, (unsigned char) i);
+            tree_count++;
+        }
+    }
     het->nodes_number = table_size;
     return het;
 }
