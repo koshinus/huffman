@@ -19,8 +19,8 @@ void make_visualization(huffman_encode_tree *het)
         fprintf(f, "dot.node(str(%d), label=str(%d) + '\\n_______\\n' + 'freq=' + str(%li))\n", i, i, het->tree[i].frequency);
     for (int i = het->nodes_number/2 + 1; i < het->nodes_number; i++)
     {
-        fprintf(f, "dot.edge(str(%d), str(%d))\n", i, het->tree[i].left);
-        fprintf(f, "dot.edge(str(%d), str(%d))\n", i, het->tree[i].right);
+        fprintf(f, "dot.edge(str(%d), str(%d), label='0')\n", i, het->tree[i].left);
+        fprintf(f, "dot.edge(str(%d), str(%d), label='1')\n", i, het->tree[i].right);
     }
     fprintf(f, "dot.render('huffman_tree', None, True)\n");
     fclose(f);
