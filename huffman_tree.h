@@ -10,10 +10,12 @@
 #include<string.h>
 #include<stdlib.h>
 
-#define BUFFER_SIZE 256
+#define    BUFFER_SIZE 256
+#define LONG_LONG_SIZE (BUFFER_SIZE/4)
 
 typedef struct huffman_encode_node_
 {
+    unsigned long long code;     //Huffman code for symbol
     unsigned long frequency;		//Summary frequency of node
 	unsigned short code_size;		//Number of useful bits in "code" variable
     short left, right;			    //Left and right parents of node
@@ -22,7 +24,6 @@ typedef struct huffman_encode_node_
 			                        //00000abc b = 1 if node have been used as a parent before, else b = 0
 			                        //00000abc a = 1 if node have been visited, else a = 0
     symbol;							//Symbol in node if node is leaf, else - ''
-    char *code;						//Huffman code for symbol
 } huffman_encode_node;
 
 typedef struct huffman_encode_tree_

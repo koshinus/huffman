@@ -25,3 +25,10 @@ void make_visualization(huffman_encode_tree *het)
     fprintf(f, "dot.render('huffman_tree', None, True)\n");
     fclose(f);
 }
+
+char * to_binary(char *s, unsigned long long code)
+{
+    for(int i = 0; i < 64; i++)
+        s[63-i] = (char)((code >> i) & 1) + 48;
+    return s;
+}

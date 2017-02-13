@@ -8,5 +8,6 @@
 #include "huffman_tree.h"
 
 void make_visualization(huffman_encode_tree *);
+char * to_binary(char *, unsigned long long);
 
 #endif //HUFFMAN_DEBUG_H

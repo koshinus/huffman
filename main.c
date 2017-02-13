@@ -3,10 +3,10 @@
 int main()
 {
     const char *filename;
-    FILE *f;
+    FILE *fin;
     printf("Enter file name:\n");
     scanf("%ms", &filename);
-    if ( (f = fopen(filename, "r")) == NULL )
+    if ( (fin = fopen("/home/vadim/CLion/ClionProjects/huffman/in.txt", "r")) == NULL )
     {
         printf("Impossible to open file %s.\n", filename);
         exit(1);
@@ -16,7 +16,7 @@ int main()
 	unsigned long long buffer[BUFFER_SIZE];
     memset(buffer, 0, sizeof(unsigned long long)*BUFFER_SIZE);
     int c = EOF;
-    while ((c = fgetc(f)) != EOF) buffer[(unsigned char)c]++;
+    while ((c = fgetc(fin)) != EOF) buffer[(unsigned char)c]++;
 
     unsigned short symbols_with_not_null_freq = 0;
     for(int i = 0; i < BUFFER_SIZE; i++)
@@ -36,7 +36,7 @@ int main()
 	//for(int i = 0; i < het->nodes_number; i++)
         //printf("%c: %ld\n", het->tree[i].symbol, het->tree[i].frequency);
 
-    while(2*symbols_with_not_null_freq - het->nodes_number > 1)							// 2
+    while(2*symbols_with_not_null_freq - het->nodes_number > 1)			    // 2
     {
         short left = 0, right = 0;  					            	
         left  = get_minimum(het);											// 2.1
@@ -44,8 +44,8 @@ int main()
         right = get_minimum(het);											// 2.1
         het->tree[right].free_and_is_leaf |= 2;								// 2.1
         huffman_encode_node node
-                = make_node(het->tree[ left].frequency+						// 2.2
-                            het->tree[right].frequency,						// 2.2
+                = make_node(het->tree[ left].frequency+					    // 2.2
+                            het->tree[right].frequency,	                    // 2.2
                             0, left, right, 0, '-');						// 2.2
         het->tree[het->nodes_number] = node;					    		// 2.3
         het->nodes_number++;
@@ -64,6 +64,14 @@ int main()
     make_visualization(het);
 
 	//Printing huffman codes in binary view
+    for(int i = 0; i < het->nodes_number/2 + 1; i++)
+    {
+        //printf("%c - %llu\n", het->tree[i].symbol, het->tree[i].code);
+        char s[65];
+        s[64] = '\0';
+        printf("(%d): %s\n", het->tree[i].code_size, to_binary(s, het->tree[i].code));
+    }
+    /*
     FILE *fout;
     if ( (fout = fopen("/home/vadim/CLion/ClionProjects/huffman/out.huf", "w")) == NULL )
     {
@@ -75,12 +83,17 @@ int main()
         for(int i = 0; i < het->nodes_number/2 + 1; i++)
         //printf("%c - %s\n", het->tree[i].symbol, het->tree[i].code);
             fprintf(fout, "%c%s", het->tree[i].symbol, het->tree[i].code);
-        rewind(f);
+        rewind(fin);
+        c = EOF;
+        while((c = fgetc(fin)) != EOF )
+        {
 
+        }
         fclose(fout);
     }
+    */
     free(het);
-    fclose(f);
+    fclose(fin);
 	
     return 0;
 }

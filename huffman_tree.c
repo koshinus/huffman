@@ -4,15 +4,22 @@
 
 #include "huffman_tree.h"
 
-huffman_encode_node make_node(unsigned long freq, unsigned short cs, short l, short r, unsigned char leaf, unsigned char symb)
+huffman_encode_node make_node(unsigned long freq, unsigned short cs,
+                              short l, short r, unsigned char leaf, unsigned char symb)
 {
     huffman_encode_node node;
+    /*
+    {
+        unsigned long long new_code[4] = {0};
+        memcpy(node.code, new_code, sizeof(new_code));
+    }
+    */
+    node.code = 0;
     node.frequency = freq;
     node.code_size = cs;
     node.left = l;
     node.right = r;
     node.free_and_is_leaf = leaf;
-    node.code = "\0";
 	node.symbol = symb;
     return node;
 }
@@ -41,26 +48,22 @@ long long cmp(huffman_encode_node *l, huffman_encode_node *r)
 
 void get_huffman_codes_for_symbols(huffman_encode_tree *het, short parent)
 {
+    /*TODO: document all byte operations!!!!!
+     * */
     short l = het->tree[parent].left, r = het->tree[parent].right;
-    unsigned short l_code_size, r_code_size;
-    char *l_code, *r_code;
+    unsigned long long p_code = het->tree[parent].code, l_code, r_code;
+    unsigned short p_code_size = het->tree[parent].code_size;
+    //fprintf(f, "%d - %llu\n", parent, p_code);
+    //unsigned short byte_number = p_code_size/LONG_LONG_SIZE;
     if(l == -1) return;
     else
     {
-		het->tree[l].code_size = het->tree[parent].code_size + (short)1;
-        l_code_size = het->tree[l].code_size;
-        l_code = (char *)malloc(sizeof(char)*(l_code_size+1));
-        strcpy(l_code, het->tree[parent].code);
-        l_code[l_code_size-1] = '0';
-        l_code[l_code_size] = '\0';
+        het->tree[l].code_size = p_code_size + (short)1;
+        l_code = p_code << 1;
         het->tree[l].code = l_code;
         get_huffman_codes_for_symbols(het, l);
-        het->tree[r].code_size = het->tree[parent].code_size + (short)1;
-        r_code_size = het->tree[r].code_size;
-        r_code = (char *)malloc(sizeof(char)*(r_code_size+1));
-        strcpy(r_code, het->tree[parent].code);
-        r_code[r_code_size-1] = '1';
-        r_code[r_code_size] = '\0';
+        het->tree[r].code_size = p_code_size + (short)1;
+        r_code = (p_code << 1) + 1;
         het->tree[r].code = r_code;
         get_huffman_codes_for_symbols(het, r);
     }
@@ -84,6 +87,27 @@ short get_minimum(huffman_encode_tree *het)
     return min;
 }
 
+/*
+het->tree[l].code_size = p_code_size + (short)1;
+for(int i = 0; i < byte_number;i++)
+    het->tree[l].code[i] = het->tree[parent].code[i];
+if(byte_number <= 3)
+    het->tree[l].code[byte_number] = het->tree[parent].code[byte_number];
+    //het->tree[r].code[byte_number] = het->tree[parent].code[byte_number] << 1;
+//het->tree[l].code[p_code_size/BYTE_SIZE+1] += 0 << (BYTE_SIZE - (p_code_size%BYTE_SIZE));
+//het->tree[l].code[(p_code_size + 1)/BYTE_SIZE] = het->tree[parent].code[p_code_size/BYTE_SIZE] << 1;
+get_huffman_codes_for_symbols(het, l);
+het->tree[r].code_size = het->tree[parent].code_size + (short)1;
+for(int i = 0; i < byte_number;i++)
+    het->tree[r].code[i] = het->tree[parent].code[i];
+if(byte_number <= 3)
+{
+    het->tree[r].code[byte_number] = het->tree[parent].code[byte_number];
+    //het->tree[r].code[byte_number] = (het->tree[parent].code[byte_number] << 1) + 1;
+    het->tree[r].code[byte_number] |= 1 << (LONG_LONG_SIZE - (p_code_size % LONG_LONG_SIZE));
+}
+get_huffman_codes_for_symbols(het, r);
+*/
 
 /*
 void get_minimums(huffman_encode_tree *het, short *left, short *right)
