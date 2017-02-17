@@ -64,14 +64,19 @@ int main()
     make_visualization(het);
 
 	//Printing huffman codes in binary view
+    /*
     for(int i = 0; i < het->nodes_number/2 + 1; i++)
     {
-        //printf("%c - %llu\n", het->tree[i].symbol, het->tree[i].code);
-        char s[65];
-        s[64] = '\0';
-        printf("(%d): %s\n", het->tree[i].code_size, to_binary(s, het->tree[i].code));
+        unsigned short elem_amount = het->tree[i].code_size/LONG_LONG_SIZE;
+        char s1[LONG_LONG_SIZE + 1], s2[het->tree[i].code_size%LONG_LONG_SIZE + 1];
+        s1[LONG_LONG_SIZE] = '\0'; s2[het->tree[i].code_size%LONG_LONG_SIZE] = '\0';
+        for(int j = 0; j < elem_amount; j++)
+            printf("(%d): %s\n", het->tree[i].code_size, to_binary(s1, het->tree[i].code[j], elem_amount));
+        printf("(%d): %s\n", het->tree[i].code_size,
+               to_binary(s2, het->tree[i].code[elem_amount], het->tree[i].code_size%LONG_LONG_SIZE));
     }
-    /*
+    */
+
     FILE *fout;
     if ( (fout = fopen("/home/vadim/CLion/ClionProjects/huffman/out.huf", "w")) == NULL )
     {
@@ -81,19 +86,56 @@ int main()
     else
     {
         for(int i = 0; i < het->nodes_number/2 + 1; i++)
-        //printf("%c - %s\n", het->tree[i].symbol, het->tree[i].code);
-            fprintf(fout, "%c%s", het->tree[i].symbol, het->tree[i].code);
+        {
+            unsigned short elem_amount = het->tree[i].code_size/LONG_LONG_SIZE;
+            char s1[LONG_LONG_SIZE + 1], s2[het->tree[i].code_size%LONG_LONG_SIZE + 1];
+            s1[LONG_LONG_SIZE] = '\0'; s2[het->tree[i].code_size%LONG_LONG_SIZE] = '\0';
+            for(int j = 0; j < elem_amount; j++)
+                fprintf(fout, "%c%s", het->tree[i].symbol, to_binary(s1, het->tree[i].code[j], elem_amount));
+            fprintf(fout, "%c%s", het->tree[i].symbol,
+                   to_binary(s2, het->tree[i].code[elem_amount], het->tree[i].code_size%LONG_LONG_SIZE));
+            //printf("%d....OK\n", i);
+        }
         rewind(fin);
         c = EOF;
-        while((c = fgetc(fin)) != EOF )
+        //printf("OK");
+        char ch = 0;
+        unsigned short bits_write_in_ch = 0;
+        while( (c = fgetc(fin)) != EOF )
         {
-
+            //printf("%c....", c);
+            huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
+            int limit = (node->code_size/LONG_LONG_SIZE > 0)? node->code_size/LONG_LONG_SIZE - 1: 0;
+            for(int i = 0; i < limit; i++)
+                for(int j = 0; j < LONG_LONG_SIZE; j++)
+                {
+                    if(bits_write_in_ch == 8)
+                    {
+                        fprintf(fout, "%c", ch);
+                        ch = 0;
+                        bits_write_in_ch = 0;
+                    }
+                    ch <<= 1;
+                    ch |= (node->code[i] >> (LONG_LONG_SIZE - i - 1)) & 1;
+                    bits_write_in_ch++;
+                }
+            for (int i = 0; i < node->code_size%LONG_LONG_SIZE; i++)
+            {
+                if(bits_write_in_ch == 8)
+                {
+                    fprintf(fout, "%c", ch);
+                    ch = 0;
+                    bits_write_in_ch = 0;
+                }
+                ch <<= 1;
+                ch |= (node->code[limit] >> (node->code_size%LONG_LONG_SIZE - i - 1)) & 1;
+                bits_write_in_ch++;
+            }
+            //printf("%d%d%c\n", 0, 1, '<');
         }
         fclose(fout);
     }
-    */
     free(het);
     fclose(fin);
-	
     return 0;
 }

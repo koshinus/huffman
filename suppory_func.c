@@ -26,9 +26,9 @@ void make_visualization(huffman_encode_tree *het)
     fclose(f);
 }
 
-char * to_binary(char *s, unsigned long long code)
+char * to_binary(char *s, unsigned long long code, unsigned short code_size)
 {
-    for(int i = 0; i < 64; i++)
-        s[63-i] = (char)((code >> i) & 1) + 48;
+    for(int i = 0; i < code_size; i++)
+        s[code_size - i - 1] = (char)((code >> i) & 1) + 48;
     return s;
 }

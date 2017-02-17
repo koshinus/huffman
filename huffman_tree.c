@@ -14,7 +14,7 @@ huffman_encode_node make_node(unsigned long freq, unsigned short cs,
         memcpy(node.code, new_code, sizeof(new_code));
     }
     */
-    node.code = 0;
+    node.code = (unsigned long long *)calloc(1, sizeof(unsigned long long));
     node.frequency = freq;
     node.code_size = cs;
     node.left = l;
@@ -48,25 +48,46 @@ long long cmp(huffman_encode_node *l, huffman_encode_node *r)
 
 void get_huffman_codes_for_symbols(huffman_encode_tree *het, short parent)
 {
-    /*TODO: document all byte operations!!!!!
-     * */
     short l = het->tree[parent].left, r = het->tree[parent].right;
-    unsigned long long p_code = het->tree[parent].code, l_code, r_code;
-    unsigned short p_code_size = het->tree[parent].code_size;
-    //fprintf(f, "%d - %llu\n", parent, p_code);
-    //unsigned short byte_number = p_code_size/LONG_LONG_SIZE;
     if(l == -1) return;
     else
     {
-        het->tree[l].code_size = p_code_size + (short)1;
-        l_code = p_code << 1;
-        het->tree[l].code = l_code;
+        get_huffman_codes_step(het, parent, l, 0);
         get_huffman_codes_for_symbols(het, l);
-        het->tree[r].code_size = p_code_size + (short)1;
-        r_code = (p_code << 1) + 1;
-        het->tree[r].code = r_code;
+        get_huffman_codes_step(het, parent, r, 1);
         get_huffman_codes_for_symbols(het, r);
     }
+}
+
+void get_huffman_codes_step(huffman_encode_tree *het, short parent, short child, char right)
+{
+    /*TODO: document all byte operations!!!!!
+     * */
+    het->tree[child].code_size = het->tree[parent].code_size + (short)1;
+    unsigned short parent_bytes = het->tree[parent].code_size/LONG_LONG_SIZE;
+    unsigned short  child_bytes = het->tree[ child].code_size/LONG_LONG_SIZE;
+    if(child_bytes > parent_bytes)
+    {
+        het->tree[child].code = (unsigned long long *)calloc(child_bytes, sizeof(unsigned long long));
+        for(int i = 0; i < parent_bytes; i++)
+            het->tree[child].code[i] = het->tree[parent].code[i];
+        if(right) het->tree[child].code[parent_bytes] = 1;
+    }
+    else
+    {
+        unsigned short last_byte = (parent_bytes > 0)? parent_bytes - 1: 0;
+        for(int i = 0; i < last_byte; i++)
+            het->tree[child].code[i] = het->tree[parent].code[i];
+        het->tree[child].code[last_byte] = het->tree[parent].code[last_byte] << 1;
+        if(right) het->tree[child].code[last_byte]++;
+    }
+}
+
+huffman_encode_node * get_huffman_node_by_symbol(huffman_encode_tree *het, unsigned char symbol)
+{
+    for(int i = 0; i < het->nodes_number/2 + 1; i++)
+        if(het->tree[i].symbol == symbol)
+            return &het->tree[i];
 }
 
 short get_minimum(huffman_encode_tree *het)
