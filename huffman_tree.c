@@ -75,7 +75,8 @@ void get_huffman_codes_step(huffman_encode_tree *het, short parent, short child,
     }
     else
     {
-        unsigned short last_byte = (parent_bytes > 0)? parent_bytes - 1: 0;
+        //unsigned short last_byte = (parent_bytes > 0)? parent_bytes - 1: 0;
+        unsigned short last_byte = get_limit(parent_bytes);
         for(int i = 0; i < last_byte; i++)
             het->tree[child].code[i] = het->tree[parent].code[i];
         het->tree[child].code[last_byte] = het->tree[parent].code[last_byte] << 1;
@@ -108,27 +109,123 @@ short get_minimum(huffman_encode_tree *het)
     return min;
 }
 
-/*
-het->tree[l].code_size = p_code_size + (short)1;
-for(int i = 0; i < byte_number;i++)
-    het->tree[l].code[i] = het->tree[parent].code[i];
-if(byte_number <= 3)
-    het->tree[l].code[byte_number] = het->tree[parent].code[byte_number];
-    //het->tree[r].code[byte_number] = het->tree[parent].code[byte_number] << 1;
-//het->tree[l].code[p_code_size/BYTE_SIZE+1] += 0 << (BYTE_SIZE - (p_code_size%BYTE_SIZE));
-//het->tree[l].code[(p_code_size + 1)/BYTE_SIZE] = het->tree[parent].code[p_code_size/BYTE_SIZE] << 1;
-get_huffman_codes_for_symbols(het, l);
-het->tree[r].code_size = het->tree[parent].code_size + (short)1;
-for(int i = 0; i < byte_number;i++)
-    het->tree[r].code[i] = het->tree[parent].code[i];
-if(byte_number <= 3)
+
+void make_visualization(huffman_encode_tree *het)
 {
-    het->tree[r].code[byte_number] = het->tree[parent].code[byte_number];
-    //het->tree[r].code[byte_number] = (het->tree[parent].code[byte_number] << 1) + 1;
-    het->tree[r].code[byte_number] |= 1 << (LONG_LONG_SIZE - (p_code_size % LONG_LONG_SIZE));
+    FILE *f;
+    if ((f = fopen("/home/vadim/CLion/ClionProjects/huffman/tree_visualization.py", "w")) == NULL)
+    {
+        printf("Impossible to open file %s.\n", "tree_visualization.py\0");
+        exit(1);
+    }
+    fprintf(f, "from graphviz import Digraph\n\n"
+            "dot = Digraph('Huffman Tree')\ndot.attr('node', shape='box')\n");
+    for (int i = 0; i < het->nodes_number; i++)
+        fprintf(f, "dot.node(str(%d), label=str(%d) + '\\n_______\\n' + 'freq=' + str(%li))\n", i, i, het->tree[i].frequency);
+    for (int i = het->nodes_number/2 + 1; i < het->nodes_number; i++)
+    {
+        fprintf(f, "dot.edge(str(%d), str(%d), label='0')\n", i, het->tree[i].left);
+        fprintf(f, "dot.edge(str(%d), str(%d), label='1')\n", i, het->tree[i].right);
+    }
+    fprintf(f, "dot.render('huffman_tree', None, True)\n");
+    fclose(f);
 }
-get_huffman_codes_for_symbols(het, r);
-*/
+
+
+void encode_file(FILE *f, huffman_encode_tree *het)
+{
+    FILE *fout;
+    if ( (fout = fopen("/home/vadim/CLion/ClionProjects/huffman/debag.txt", "w")) == NULL )
+    {
+        printf("Impossible to open file %s.\n", "/home/vadim/CLion/ClionProjects/huffman/debag.txt");
+        exit(1);
+    }
+    else
+    {
+        write_symbols_codes(fout, het);
+        rewind(f);
+        int c = EOF;
+        char ch = 0;
+        unsigned short bits_write_in_ch = 0;
+        while( (c = fgetc(f)) != EOF )
+        {
+            huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
+            //unsigned short limit = (node->code_size/LONG_LONG_SIZE > 0)? node->code_size/LONG_LONG_SIZE - 1: 0;
+            unsigned short limit = get_limit(node->code_size/LONG_LONG_SIZE);
+            for(int i = 0; i < limit; i++)
+                for(int j = 0; j < LONG_LONG_SIZE; j++)
+                {
+                    encode_step(fout, bits_write_in_ch, ch);
+                    ch |= (node->code[i] >> (LONG_LONG_SIZE - i - 1)) & 1;
+                }
+            for (int i = 0; i < node->code_size%LONG_LONG_SIZE; i++)
+            {
+                encode_step(fout, bits_write_in_ch, ch);
+                ch |= (node->code[limit] >> (node->code_size%LONG_LONG_SIZE - i - 1)) & 1;
+            }
+        }
+        /*
+        if(bits_write_in_ch != 0)
+        {
+            //fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch - 1));
+            //fprintf(fout, "%d", bits_write_in_ch - 1);
+            char s[bits_write_in_ch + 1]; s[bits_write_in_ch] = '\0';
+            fprintf(fout, "%s", to_binary(s, (unsigned long long)ch, bits_write_in_ch));
+            fprintf(fout, "%d", bits_write_in_ch);
+        }
+        */
+        fclose(fout);
+    }
+}
+
+void write_symbols_codes(FILE *f, huffman_encode_tree *het)
+{
+    for(int i = 0; i < het->nodes_number/2 + 1; i++)
+    {
+        unsigned short elem_amount = het->tree[i].code_size / LONG_LONG_SIZE;
+        char s1[LONG_LONG_SIZE + 1], s2[het->tree[i].code_size % LONG_LONG_SIZE + 1];
+        s1[LONG_LONG_SIZE] = '\0';
+        s2[het->tree[i].code_size % LONG_LONG_SIZE] = '\0';
+        for (int j = 0; j < elem_amount; j++)
+            fprintf(f, "%c%s", het->tree[i].symbol, to_binary(s1, het->tree[i].code[j], elem_amount));
+        fprintf(f, "%c%s", het->tree[i].symbol,
+                to_binary(s2, het->tree[i].code[elem_amount], het->tree[i].code_size % LONG_LONG_SIZE));
+    }
+    fprintf(f, "\n");
+}
+
+void encode_step(FILE *f, unsigned short bits_write_in_ch, char ch)
+{
+    if(bits_write_in_ch == BYTE_SIZE)
+    {
+        //char s[9]; s[8] = '\0';
+        //fprintf(fout, "%s", to_binary(s, (unsigned long long)ch, BYTE_SIZE));
+        fprintf(f, "%c", ch);
+        ch = 0;
+        bits_write_in_ch = 0;
+    }
+    ch <<= 1;
+    bits_write_in_ch++;
+}
+
+void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
+{
+    //qsort(het->tree, het->nodes_number, sizeof(huffman_encode_node), cmp);
+    while(2*count - het->nodes_number > 1)			    // 2
+    {
+        short left = 0, right = 0;
+        left  = get_minimum(het);											// 2.1
+        het->tree[ left].free_and_is_leaf |= 2;								// 2.1
+        right = get_minimum(het);											// 2.1
+        het->tree[right].free_and_is_leaf |= 2;								// 2.1
+        huffman_encode_node node
+                = make_node(het->tree[ left].frequency+					    // 2.2
+                            het->tree[right].frequency,	                    // 2.2
+                            0, left, right, 0, '-');						// 2.2
+        het->tree[het->nodes_number] = node;					    		// 2.3
+        het->nodes_number++;
+    }
+}
 
 /*
 void get_minimums(huffman_encode_tree *het, short *left, short *right)

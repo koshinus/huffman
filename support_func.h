@@ -5,9 +5,9 @@
 #ifndef HUFFMAN_DEBUG_H
 #define HUFFMAN_DEBUG_H
 
-#include "huffman_tree.h"
-
-void make_visualization(huffman_encode_tree *);
 char * to_binary(char *, unsigned long long, unsigned short);
+unsigned short get_limit(unsigned short);
+void get_frequency_table(FILE *, unsigned long long *);
+unsigned short count_symbols_with_not_null_frequency(unsigned long long *);
 
 #endif //HUFFMAN_DEBUG_H

@@ -9,6 +9,7 @@
 #include<stddef.h>
 #include<string.h>
 #include<stdlib.h>
+#include "support_func.h"
 
 #define      BYTE_SIZE 8
 #define LONG_LONG_SIZE 64
@@ -40,6 +41,10 @@ short get_minimum(huffman_encode_tree *);
 void get_huffman_codes_step(huffman_encode_tree *, short, short, char);
 void get_huffman_codes_for_symbols(huffman_encode_tree *, short);
 huffman_encode_node * get_huffman_node_by_symbol(huffman_encode_tree *, unsigned char);
-
+void make_visualization(huffman_encode_tree *);
+void write_symbols_codes(FILE *, huffman_encode_tree *);
+void encode_file(FILE *, huffman_encode_tree *);
+void encode_step(FILE *, unsigned short, char);
+void huffman_algorithm(huffman_encode_tree *, unsigned short);
 
 #endif //HUFFMAN_HUFFMAN_TREE_H
