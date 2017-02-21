@@ -4,16 +4,35 @@
 
 #include "huffman_tree.h"
 
+void encode_file(FILE *f)
+{
+    //Getting frequency table from text or binary file
+    unsigned long long buffer[BUFFER_SIZE];
+    get_frequency_table(f, buffer);
+
+    unsigned short symbols_with_not_null_freq = count_symbols_with_not_null_frequency(buffer);
+
+    //https://en.wikipedia.org/wiki/Huffman_coding
+    //Algorithm steps:
+    huffman_encode_tree *het = make_tree(het, buffer, symbols_with_not_null_freq);			// 1
+    huffman_algorithm(het, symbols_with_not_null_freq);                                     //2.1 - 2.3
+
+    //Getting huffman codes for leafs
+    get_huffman_codes_for_symbols(het, het->nodes_number-(short)1);
+
+    //Visualize huffman tree
+    make_visualization(het);
+
+    //Encode file
+    encode(f, het);
+
+    free(het);
+}
+
 huffman_encode_node make_node(unsigned long freq, unsigned short cs,
                               short l, short r, unsigned char leaf, unsigned char symb)
 {
     huffman_encode_node node;
-    /*
-    {
-        unsigned long long new_code[4] = {0};
-        memcpy(node.code, new_code, sizeof(new_code));
-    }
-    */
     node.code = (unsigned long long *)calloc(1, sizeof(unsigned long long));
     node.frequency = freq;
     node.code_size = cs;
@@ -39,11 +58,6 @@ huffman_encode_tree * make_tree(huffman_encode_tree *het, unsigned long long *fr
     }
     het->nodes_number = table_size;
     return het;
-}
-
-long long cmp(huffman_encode_node *l, huffman_encode_node *r)
-{
-    return (long long)(l->frequency) - (long long)(r->frequency);
 }
 
 void get_huffman_codes_for_symbols(huffman_encode_tree *het, short parent)
@@ -76,7 +90,8 @@ void get_huffman_codes_step(huffman_encode_tree *het, short parent, short child,
     else
     {
         //unsigned short last_byte = (parent_bytes > 0)? parent_bytes - 1: 0;
-        unsigned short last_byte = get_limit(parent_bytes);
+        //unsigned short last_byte = get_limit(parent_bytes);
+        unsigned short last_byte = LIMIT(parent_bytes);
         for(int i = 0; i < last_byte; i++)
             het->tree[child].code[i] = het->tree[parent].code[i];
         het->tree[child].code[last_byte] = het->tree[parent].code[last_byte] << 1;
@@ -132,12 +147,12 @@ void make_visualization(huffman_encode_tree *het)
 }
 
 
-void encode_file(FILE *f, huffman_encode_tree *het)
+void encode(FILE *f, huffman_encode_tree *het)
 {
     FILE *fout;
-    if ( (fout = fopen("/home/vadim/CLion/ClionProjects/huffman/debag.txt", "w")) == NULL )
+    if ( (fout = fopen("/home/vadim/CLion/ClionProjects/huffman/out.huf", "w")) == NULL )
     {
-        printf("Impossible to open file %s.\n", "/home/vadim/CLion/ClionProjects/huffman/debag.txt");
+        printf("Impossible to open file %s.\n", "/home/vadim/CLion/ClionProjects/huffman/out.huf");
         exit(1);
     }
     else
@@ -151,18 +166,13 @@ void encode_file(FILE *f, huffman_encode_tree *het)
         {
             huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
             //unsigned short limit = (node->code_size/LONG_LONG_SIZE > 0)? node->code_size/LONG_LONG_SIZE - 1: 0;
-            unsigned short limit = get_limit(node->code_size/LONG_LONG_SIZE);
+            //unsigned short limit = get_limit(node->code_size/LONG_LONG_SIZE);
+            unsigned short limit = LIMIT(node->code_size/LONG_LONG_SIZE);
             for(int i = 0; i < limit; i++)
                 for(int j = 0; j < LONG_LONG_SIZE; j++)
-                {
-                    encode_step(fout, bits_write_in_ch, ch);
-                    ch |= (node->code[i] >> (LONG_LONG_SIZE - i - 1)) & 1;
-                }
-            for (int i = 0; i < node->code_size%LONG_LONG_SIZE; i++)
-            {
-                encode_step(fout, bits_write_in_ch, ch);
-                ch |= (node->code[limit] >> (node->code_size%LONG_LONG_SIZE - i - 1)) & 1;
-            }
+                    encode_step(fout, node, &bits_write_in_ch, &ch, i, j, 0);
+            for (int i = 0; i < node->code_size % LONG_LONG_SIZE; i++)
+                encode_step(fout, node, &bits_write_in_ch, &ch, limit, i, 1);
         }
         /*
         if(bits_write_in_ch != 0)
@@ -194,36 +204,53 @@ void write_symbols_codes(FILE *f, huffman_encode_tree *het)
     fprintf(f, "\n");
 }
 
-void encode_step(FILE *f, unsigned short bits_write_in_ch, char ch)
+void encode_step(FILE *f, huffman_encode_node *node, unsigned short *bits_write_in_ch, char *ch, int node_code_num, int count, char last)
 {
-    if(bits_write_in_ch == BYTE_SIZE)
+    if(*bits_write_in_ch == BYTE_SIZE)
     {
         //char s[9]; s[8] = '\0';
         //fprintf(fout, "%s", to_binary(s, (unsigned long long)ch, BYTE_SIZE));
-        fprintf(f, "%c", ch);
-        ch = 0;
-        bits_write_in_ch = 0;
+        fprintf(f, "%c", *ch);
+        *ch = 0;
+        *bits_write_in_ch = 0;
     }
-    ch <<= 1;
-    bits_write_in_ch++;
+    *ch <<= 1;
+    *bits_write_in_ch++;
+    if(last) *ch |= (node->code[node_code_num] >> (node->code_size % LONG_LONG_SIZE - count - 1)) & 1;
+    else *ch |= (node->code[node_code_num] >> (LONG_LONG_SIZE - count - 1)) & 1;
 }
 
 void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
 {
-    //qsort(het->tree, het->nodes_number, sizeof(huffman_encode_node), cmp);
-    while(2*count - het->nodes_number > 1)			    // 2
+    while(2*count - het->nodes_number > 1)			                        // 2
     {
-        short left = 0, right = 0;
+        short left, right;
         left  = get_minimum(het);											// 2.1
         het->tree[ left].free_and_is_leaf |= 2;								// 2.1
         right = get_minimum(het);											// 2.1
         het->tree[right].free_and_is_leaf |= 2;								// 2.1
         huffman_encode_node node
-                = make_node(het->tree[ left].frequency+					    // 2.2
-                            het->tree[right].frequency,	                    // 2.2
+                = make_node(het->tree[ left].frequency +					// 2.2
+                            het->tree[right].frequency ,	                // 2.2
                             0, left, right, 0, '-');						// 2.2
         het->tree[het->nodes_number] = node;					    		// 2.3
         het->nodes_number++;
+    }
+}
+
+void decode_file(char *filename)
+{
+    FILE *f;
+    if ( (f = fopen("/home/vadim/CLion/ClionProjects/huffman/out.huf", "w")) == NULL )
+    //if ( (f = fopen(filename, "w")) == NULL )
+    {
+        printf("Impossible to open file %s.\n", "/home/vadim/CLion/ClionProjects/huffman/out.huf");
+        //printf("Impossible to open file %s.\n", filename);
+        exit(1);
+    }
+    else
+    {
+        
     }
 }
 

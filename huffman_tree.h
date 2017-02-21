@@ -34,7 +34,6 @@ typedef struct huffman_encode_tree_
     huffman_encode_node tree[];
 } huffman_encode_tree;
 
-long long cmp(huffman_encode_node *, huffman_encode_node *);
 huffman_encode_node make_node(unsigned long, unsigned short, short, short, unsigned char, unsigned char);
 huffman_encode_tree * make_tree(huffman_encode_tree *, unsigned long long *, unsigned short);
 short get_minimum(huffman_encode_tree *);
@@ -43,8 +42,9 @@ void get_huffman_codes_for_symbols(huffman_encode_tree *, short);
 huffman_encode_node * get_huffman_node_by_symbol(huffman_encode_tree *, unsigned char);
 void make_visualization(huffman_encode_tree *);
 void write_symbols_codes(FILE *, huffman_encode_tree *);
-void encode_file(FILE *, huffman_encode_tree *);
-void encode_step(FILE *, unsigned short, char);
+void encode(FILE *, huffman_encode_tree *);
+void encode_file(FILE *);
+void encode_step(FILE *, huffman_encode_node *, unsigned short *, char *, int, int, char);
 void huffman_algorithm(huffman_encode_tree *, unsigned short);
 
 #endif //HUFFMAN_HUFFMAN_TREE_H
