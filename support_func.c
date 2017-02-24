@@ -2,7 +2,7 @@
 // Created by vadim on 08.02.17.
 //
 
-#include "huffman_tree.h"
+#include "encode_tree.h"
 
 char * to_binary(char *s, unsigned long long code, unsigned short code_size)
 {

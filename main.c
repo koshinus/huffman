@@ -1,4 +1,4 @@
-#include "huffman_tree.h"
+#include "encode_tree.h"
 
 int main()
 {

@@ -2,7 +2,7 @@
 // Created by vadim on 15.09.16.
 //
 
-#include "huffman_tree.h"
+#include "encode_tree.h"
 
 void encode_file(FILE *f)
 {
@@ -14,7 +14,7 @@ void encode_file(FILE *f)
 
     //https://en.wikipedia.org/wiki/Huffman_coding
     //Algorithm steps:
-    huffman_encode_tree *het = make_tree(het, buffer, symbols_with_not_null_freq);			// 1
+    huffman_encode_tree *het = make_encode_tree(het, buffer, symbols_with_not_null_freq);			// 1
     huffman_algorithm(het, symbols_with_not_null_freq);                                     //2.1 - 2.3
 
     //Getting huffman codes for leafs
@@ -29,7 +29,7 @@ void encode_file(FILE *f)
     free(het);
 }
 
-huffman_encode_node make_node(unsigned long freq, unsigned short cs,
+huffman_encode_node make_encode_node(unsigned long freq, unsigned short cs,
                               short l, short r, unsigned char leaf, unsigned char symb)
 {
     huffman_encode_node node;
@@ -43,7 +43,7 @@ huffman_encode_node make_node(unsigned long freq, unsigned short cs,
     return node;
 }
 
-huffman_encode_tree * make_tree(huffman_encode_tree *het, unsigned long long *frequency_table, unsigned short table_size)
+huffman_encode_tree * make_encode_tree(huffman_encode_tree *het, unsigned long long *frequency_table, unsigned short table_size)
 {
     size_t size = offsetof(huffman_encode_tree, tree) + sizeof(huffman_encode_node) * (2 * table_size - 1);
     het = (huffman_encode_tree *) malloc(size);
@@ -52,7 +52,7 @@ huffman_encode_tree * make_tree(huffman_encode_tree *het, unsigned long long *fr
     {
         if(frequency_table[i] != 0)
         {
-            het->tree[tree_count] = make_node(frequency_table[i], 0, -1, -1, 1, (unsigned char)i);
+            het->tree[tree_count] = make_encode_node(frequency_table[i], 0, -1, -1, 1, (unsigned char)i);
             tree_count++;
         }
     }
@@ -157,7 +157,8 @@ void encode(FILE *f, huffman_encode_tree *het)
     }
     else
     {
-        write_symbols_codes(fout, het);
+        //write_symbols_codes(fout, het);
+        write_tree_to_file(fout, het);
         rewind(f);
         int c = EOF;
         char ch = 0;
@@ -188,6 +189,7 @@ void encode(FILE *f, huffman_encode_tree *het)
     }
 }
 
+/*
 void write_symbols_codes(FILE *f, huffman_encode_tree *het)
 {
     for(int i = 0; i < het->nodes_number/2 + 1; i++)
@@ -202,6 +204,18 @@ void write_symbols_codes(FILE *f, huffman_encode_tree *het)
                 to_binary(s2, het->tree[i].code[elem_amount], het->tree[i].code_size % LONG_LONG_SIZE));
     }
     fprintf(f, "\n");
+}
+*/
+
+void write_tree_to_file(FILE *f, huffman_encode_tree *het)
+{
+    fprintf(f, "%d", het->nodes_number);
+    for(int i = 0; i < het->nodes_number; i++)
+    {
+        if(i < het->nodes_number/2 + 1)
+            fprintf(f, "%c %hi %hi\n", het->tree[i].symbol, het->tree[i].left, het->tree[i].right);
+        else fprintf(f, "- %hi %hi\n", het->tree[i].left, het->tree[i].right);
+    }
 }
 
 void encode_step(FILE *f, huffman_encode_node *node, unsigned short *bits_write_in_ch, char *ch, int node_code_num, int count, char last)
@@ -230,27 +244,11 @@ void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
         right = get_minimum(het);											// 2.1
         het->tree[right].free_and_is_leaf |= 2;								// 2.1
         huffman_encode_node node
-                = make_node(het->tree[ left].frequency +					// 2.2
+                = make_encode_node(het->tree[ left].frequency +					// 2.2
                             het->tree[right].frequency ,	                // 2.2
                             0, left, right, 0, '-');						// 2.2
         het->tree[het->nodes_number] = node;					    		// 2.3
         het->nodes_number++;
-    }
-}
-
-void decode_file(char *filename)
-{
-    FILE *f;
-    if ( (f = fopen("/home/vadim/CLion/ClionProjects/huffman/out.huf", "w")) == NULL )
-    //if ( (f = fopen(filename, "w")) == NULL )
-    {
-        printf("Impossible to open file %s.\n", "/home/vadim/CLion/ClionProjects/huffman/out.huf");
-        //printf("Impossible to open file %s.\n", filename);
-        exit(1);
-    }
-    else
-    {
-        
     }
 }
 
