@@ -16,12 +16,13 @@ huffman_decode_node make_decode_node(short left, short right, char symb)
 huffman_decode_tree * make_decode_tree(FILE *f, huffman_decode_tree *hdt)
 {
     unsigned short nodes_number;
-    fscanf(f, "%hi", &nodes_number);
+    char c;
+    fscanf(f, "%hi%c", &nodes_number, &c);
     size_t size = offsetof(huffman_decode_tree, tree) + sizeof(huffman_decode_node) * nodes_number;
     hdt = (huffman_decode_tree *)malloc(size);
     for(size_t i = 0; i < nodes_number; i++)
     {
-        char symbol, c;
+        char symbol;
         short left, right;
         fscanf(f, "%c%hi%hi%c", &symbol, &left, &right, &c);
         hdt->tree[i] = make_decode_node(left, right, symbol);
@@ -29,7 +30,7 @@ huffman_decode_tree * make_decode_tree(FILE *f, huffman_decode_tree *hdt)
     return hdt;
 }
 
-char tree_search(huffman_decode_tree *hdt, unsigned char code, unsigned short *pos, unsigned short root, char readed_bits)
+char tree_search(huffman_decode_tree *hdt, unsigned char code, short *pos, unsigned short root, char readed_bits)
 {
     short l = hdt->tree[*pos].left, r = hdt->tree[*pos].right;
     if(l == -1)
@@ -42,8 +43,9 @@ char tree_search(huffman_decode_tree *hdt, unsigned char code, unsigned short *p
     else
     {
         readed_bits++;
-        if(code << 7 == 0) return tree_search(hdt, code << 1, &(unsigned short)l, root, readed_bits);
-        return tree_search(hdt, code << 1, &(unsigned short)r, root, readed_bits);
+
+        if(code << 7 == 0) return tree_search(hdt, code << 1, &l, root, readed_bits);
+        else return tree_search(hdt, code << 1, &r, root, readed_bits);
     }
 }
 
@@ -71,5 +73,6 @@ void decode_file(char *input_fpath, char *output_fpath)
             if(position != root) continue;
             else fprintf(f2, "%c", ch);
         }
+        fclose(f1); fclose(f2);
     }
 }

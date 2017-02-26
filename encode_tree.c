@@ -4,6 +4,38 @@
 
 #include "encode_tree.h"
 
+huffman_encode_node make_encode_node(unsigned long freq, unsigned short cs,
+                              short l, short r, unsigned char leaf, unsigned char symb)
+{
+    huffman_encode_node node;
+    node.code = (unsigned long long *)calloc(1, sizeof(unsigned long long));
+    node.frequency = freq;
+    node.code_size = cs;
+    node.left = l;
+    node.right = r;
+    node.free_and_is_leaf = leaf;
+	node.symbol = symb;
+    return node;
+}
+
+huffman_encode_tree * make_encode_tree(huffman_encode_tree *het,
+                                       unsigned long long *frequency_table, unsigned short table_size)
+{
+    size_t size = offsetof(huffman_encode_tree, tree) + sizeof(huffman_encode_node) * (2 * table_size - 1);
+    het = (huffman_encode_tree *) malloc(size);
+    unsigned short tree_count = 0;
+    for(int i = 0; i < BUFFER_SIZE; i++)
+    {
+        if(frequency_table[i] != 0)
+        {
+            het->tree[tree_count] = make_encode_node(frequency_table[i], 0, -1, -1, 1, (unsigned char)i);
+            tree_count++;
+        }
+    }
+    het->nodes_number = table_size;
+    return het;
+}
+
 void encode_file(FILE *f)
 {
     //Getting frequency table from text or binary file
@@ -27,37 +59,6 @@ void encode_file(FILE *f)
     encode(f, het);
 
     free(het);
-}
-
-huffman_encode_node make_encode_node(unsigned long freq, unsigned short cs,
-                              short l, short r, unsigned char leaf, unsigned char symb)
-{
-    huffman_encode_node node;
-    node.code = (unsigned long long *)calloc(1, sizeof(unsigned long long));
-    node.frequency = freq;
-    node.code_size = cs;
-    node.left = l;
-    node.right = r;
-    node.free_and_is_leaf = leaf;
-	node.symbol = symb;
-    return node;
-}
-
-huffman_encode_tree * make_encode_tree(huffman_encode_tree *het, unsigned long long *frequency_table, unsigned short table_size)
-{
-    size_t size = offsetof(huffman_encode_tree, tree) + sizeof(huffman_encode_node) * (2 * table_size - 1);
-    het = (huffman_encode_tree *) malloc(size);
-    unsigned short tree_count = 0;
-    for(int i = 0; i < BUFFER_SIZE; i++)
-    {
-        if(frequency_table[i] != 0)
-        {
-            het->tree[tree_count] = make_encode_node(frequency_table[i], 0, -1, -1, 1, (unsigned char)i);
-            tree_count++;
-        }
-    }
-    het->nodes_number = table_size;
-    return het;
 }
 
 void get_huffman_codes_for_symbols(huffman_encode_tree *het, short parent)
@@ -89,8 +90,6 @@ void get_huffman_codes_step(huffman_encode_tree *het, short parent, short child,
     }
     else
     {
-        //unsigned short last_byte = (parent_bytes > 0)? parent_bytes - 1: 0;
-        //unsigned short last_byte = get_limit(parent_bytes);
         unsigned short last_byte = LIMIT(parent_bytes);
         for(int i = 0; i < last_byte; i++)
             het->tree[child].code[i] = het->tree[parent].code[i];
@@ -166,8 +165,6 @@ void encode(FILE *f, huffman_encode_tree *het)
         while( (c = fgetc(f)) != EOF )
         {
             huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
-            //unsigned short limit = (node->code_size/LONG_LONG_SIZE > 0)? node->code_size/LONG_LONG_SIZE - 1: 0;
-            //unsigned short limit = get_limit(node->code_size/LONG_LONG_SIZE);
             unsigned short limit = LIMIT(node->code_size/LONG_LONG_SIZE);
             for(int i = 0; i < limit; i++)
                 for(int j = 0; j < LONG_LONG_SIZE; j++)
@@ -178,8 +175,8 @@ void encode(FILE *f, huffman_encode_tree *het)
         /*
         if(bits_write_in_ch != 0)
         {
-            //fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch - 1));
             //fprintf(fout, "%d", bits_write_in_ch - 1);
+            //fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch - 1));
             char s[bits_write_in_ch + 1]; s[bits_write_in_ch] = '\0';
             fprintf(fout, "%s", to_binary(s, (unsigned long long)ch, bits_write_in_ch));
             fprintf(fout, "%d", bits_write_in_ch);
@@ -209,7 +206,7 @@ void write_symbols_codes(FILE *f, huffman_encode_tree *het)
 
 void write_tree_to_file(FILE *f, huffman_encode_tree *het)
 {
-    fprintf(f, "%d", het->nodes_number);
+    fprintf(f, "%d\n", het->nodes_number);
     for(int i = 0; i < het->nodes_number; i++)
     {
         if(i < het->nodes_number/2 + 1)
@@ -218,7 +215,8 @@ void write_tree_to_file(FILE *f, huffman_encode_tree *het)
     }
 }
 
-void encode_step(FILE *f, huffman_encode_node *node, unsigned short *bits_write_in_ch, char *ch, int node_code_num, int count, char last)
+void encode_step(FILE *f, huffman_encode_node *node, unsigned short *bits_write_in_ch,
+                 char *ch, int node_code_num, int count, char last)
 {
     if(*bits_write_in_ch == BYTE_SIZE)
     {
@@ -228,10 +226,10 @@ void encode_step(FILE *f, huffman_encode_node *node, unsigned short *bits_write_
         *ch = 0;
         *bits_write_in_ch = 0;
     }
-    *ch <<= 1;
-    *bits_write_in_ch++;
-    if(last) *ch |= (node->code[node_code_num] >> (node->code_size % LONG_LONG_SIZE - count - 1)) & 1;
-    else *ch |= (node->code[node_code_num] >> (LONG_LONG_SIZE - count - 1)) & 1;
+    (*ch) <<= 1;
+    (*bits_write_in_ch)++;
+    if(last) (*ch) |= (node->code[node_code_num] >> (node->code_size % LONG_LONG_SIZE - count - 1)) & 1;
+    else (*ch) |= (node->code[node_code_num] >> (LONG_LONG_SIZE - count - 1)) & 1;
 }
 
 void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
@@ -244,8 +242,8 @@ void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
         right = get_minimum(het);											// 2.1
         het->tree[right].free_and_is_leaf |= 2;								// 2.1
         huffman_encode_node node
-                = make_encode_node(het->tree[ left].frequency +					// 2.2
-                            het->tree[right].frequency ,	                // 2.2
+                = make_encode_node(het->tree[ left].frequency +				// 2.2
+                            het->tree[right].frequency,	                    // 2.2
                             0, left, right, 0, '-');						// 2.2
         het->tree[het->nodes_number] = node;					    		// 2.3
         het->nodes_number++;
@@ -286,33 +284,5 @@ void get_minimums(huffman_encode_tree *het, short *left, short *right)
         }
     }
     //if(right == 0) printf("%d, %d\n", (int)het->tree[*right].free_and_is_leaf, het->nodes_number);
-}
-
-short free_nodes_number(huffman_encode_tree *het)
-{
-    short num = 0;
-    for(int i = 0; i < het->nodes_number; i++)
-        if((het->tree[i].free_and_is_leaf & 2) == 0) num++;
-    return num;
-}
-
-void free_tree(huffman_encode_tree *het)
-{
-    free(het->tree);
-}
-
-unsigned short get_nodes_number(huffman_encode_tree *het)
-{
-    return het->nodes_number;
-}
-
-void set_nodes_number(huffman_encode_tree *het, unsigned short n)
-{
-    het->nodes_number = n;
-}
-
-huffman_encode_node * get_tree_node(huffman_encode_tree *het, unsigned short position)
-{
-    return &(het->tree[position]);
 }
 */

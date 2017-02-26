@@ -21,5 +21,7 @@ typedef struct huffman_decode_tree_
 
 huffman_decode_node make_decode_node(short, short, char);
 huffman_decode_tree * make_decode_tree(FILE *, huffman_decode_tree *);
+char tree_search(huffman_decode_tree *, unsigned char, short *, unsigned short, char);
+void decode_file(char *, char *);
 
 #endif //HUFFMAN_DECODE_TREE_H
