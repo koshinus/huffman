@@ -9,9 +9,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
     char debug = 0, is_text = 1;
-    if(strcmp(argv[2], "-b\0") == 0) is_text = 0;
-    if( !strcmp(argv[2], "-info\0") ||
-        !strcmp(argv[3], "-info\0")  )
+    if(strcmp(argv[2], "-b") == 0) is_text = 0;
+    if( !strcmp(argv[2], "-info") ||
+        !strcmp(argv[3], "-info")  )
         debug = 1;
 
     /*
