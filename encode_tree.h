@@ -36,7 +36,8 @@ void make_visualization(huffman_encode_tree *);
 //void write_symbols_codes(FILE *, huffman_encode_tree *);
 void write_tree_to_file(FILE *, huffman_encode_tree *);
 void encode(FILE *, huffman_encode_tree *);
-void encode_file(FILE *);
+int encode_file(const char *, char, char);
+void write_debug_info(huffman_encode_tree *, const char *, unsigned long long *, unsigned short);
 void encode_step(FILE *, huffman_encode_node *, unsigned short *, char *, int, int, char);
 void huffman_algorithm(huffman_encode_tree *, unsigned short);
 

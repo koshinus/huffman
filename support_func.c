@@ -30,3 +30,18 @@ unsigned short count_symbols_with_not_null_frequency(unsigned long long *buf)
         if (buf[i] != 0) count++;
     return count;
 }
+
+char * concat(char *dest, const char *src1, const char *src2)
+{
+    strcpy(dest, src1);
+    strcat(dest, src2);
+    return dest;
+}
+
+char * get_dir_path_from_full_path(char * dir_path, const char *full_path)
+{
+    char *lastSlash = NULL;
+    lastSlash = strrchr(full_path, '/');
+    dir_path = strndup(full_path, lastSlash - full_path + 1);
+    return dir_path;
+}

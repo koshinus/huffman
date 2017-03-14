@@ -9,24 +9,12 @@ int main(int argc, char *argv[])
         exit(1);
     }
     char debug = 0, is_text = 1;
-    if(strcmp(argv[2], "-b") == 0) is_text = 0;
+    if(!strcmp(argv[2], "-b")) is_text = 0;
     if( !strcmp(argv[2], "-info") ||
         !strcmp(argv[3], "-info")  )
         debug = 1;
+    if(strcmp(argv[2], "-en")) encode_file(argv[argc - 1], is_text, debug);
+    //else decode_file()
 
-    /*
-    const char *filename;
-    FILE *fin;
-    printf("Enter file name:\n");
-    scanf("%ms", &filename);
-    if ( (fin = fopen("/home/vadim/CLion/ClionProjects/huffman/in.txt", "r")) == NULL )
-    {
-        printf("Impossible to open file %s.\n", filename);
-        exit(1);
-    }
-    encode_file(fin);
-    //decode_file("d", "d");
-    fclose(fin);
-    */
     return 0;
 }
