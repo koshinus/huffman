@@ -1,9 +1,9 @@
- #Huffman encode-decode program for files
- ##Compilation:
+# Huffman encode-decode program for files
+## Compilation:
     Works with GCC with "-std=c99" flag.
- ##After compilation write:
+## After compilation write:
     "Calling executing file" -en/-de(1) -b(2) -info(3) "full path to encode/decode file"
- ##Examples:
+## Examples:
     ./main.x -en /home/user1/in.txt
     ./main.x -en -info /home/user1/in.txt
     ./main.x -en -b -info /home/user1/in.x
