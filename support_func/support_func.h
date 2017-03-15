@@ -9,11 +9,12 @@
 #include<stddef.h>
 #include<string.h>
 #include<stdlib.h>
-#include <stdint.h>
+#include<stdint.h>
 
 #define         BYTE_SIZE 8
-#define    LONG_LONG_SIZE 64
+#define           LL_SIZE 64
 #define       BUFFER_SIZE 256
+
 /*
 #define         TEXT_READ 11
 #define       BINARY_READ 12
@@ -33,10 +34,9 @@ char file_info[2][4] = {{"r", "rb", "r+", "rb+"},
 */
 
 char * to_binary(char *, unsigned long long, unsigned short);
-unsigned short get_limit(unsigned short);
 void get_frequency_table(FILE *, unsigned long long *);
 unsigned short count_symbols_with_not_null_frequency(unsigned long long *);
-char * get_dir_path_from_full_path(char *, const char *);
-char * concat(char *, const char *, const char *);
+char * get_dir_path_from_full_path(const char *);
+char * concat(const char *, const char *);
 
 #endif //HUFFMAN_DEBUG_H
