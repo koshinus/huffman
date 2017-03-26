@@ -19,7 +19,8 @@ huffman_decode_tree * make_decode_tree(FILE *f)
     char c;
     fscanf(f, "%hi%c", &nodes_number, &c);
     size_t size = offsetof(huffman_decode_tree, tree) + sizeof(huffman_decode_node) * nodes_number;
-    huffman_decode_tree *hdt = (huffman_decode_tree *)malloc(size);
+    huffman_decode_tree *hdt = (huffman_decode_tree *) malloc(size);
+    hdt->nodes_number = nodes_number;
     for(size_t i = 0; i < nodes_number; i++)
     {
         char symbol;
@@ -29,4 +30,3 @@ huffman_decode_tree * make_decode_tree(FILE *f)
     }
     return hdt;
 }
-

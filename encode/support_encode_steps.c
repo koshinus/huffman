@@ -26,7 +26,6 @@ void get_huffman_codes_step(huffman_encode_tree *het, short parent, short child,
         het->tree[child].code[last_byte] = het->tree[parent].code[last_byte] << 1;
         if(right) het->tree[child].code[last_byte]++;
     }
-    get_huffman_codes_for_symbols(het, parent);
 }
 
 huffman_encode_node * get_huffman_node_by_symbol(huffman_encode_tree *het, unsigned char symbol)
@@ -94,16 +93,11 @@ void encode(FILE *f, huffman_encode_tree *het, const char *fpath)
             for (int i = 0; i < node->code_size % LL_SIZE; i++)
                 encode_step(fout, node, &bits_write_in_ch, &ch, limit, i, 1);
         }
-        /*
         if(bits_write_in_ch != 0)
         {
-            //fprintf(fout, "%d", bits_write_in_ch - 1);
-            //fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch - 1));
-            char s[bits_write_in_ch + 1]; s[bits_write_in_ch] = '\0';
-            fprintf(fout, "%s", to_binary(s, (unsigned long long)ch, bits_write_in_ch));
-            fprintf(fout, "%d", bits_write_in_ch);
+            fprintf(fout, "%d", bits_write_in_ch - 1);
+            fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch - 1));
         }
-        */
         fclose(fout);
     }
 }
@@ -113,8 +107,6 @@ void encode_step(FILE *f, huffman_encode_node *node, unsigned short *bits_write_
 {
     if(*bits_write_in_ch == BYTE_SIZE)
     {
-        //char s[9]; s[8] = '\0';
-        //fprintf(fout, "%s", to_binary(s, (unsigned long long)ch, BYTE_SIZE));
         fprintf(f, "%c", *ch);
         *ch = 0;
         *bits_write_in_ch = 0;

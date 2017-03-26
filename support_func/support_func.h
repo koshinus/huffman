@@ -33,7 +33,7 @@ char file_info[2][4] = {{"r", "rb", "r+", "rb+"},
                         {"w", "wb", "w+", "wb+"}};
 */
 
-char * to_binary(char *, unsigned long long, unsigned short);
+char * to_binary(unsigned long long, unsigned short);
 void get_frequency_table(FILE *, unsigned long long *);
 unsigned short count_symbols_with_not_null_frequency(unsigned long long *);
 char * get_dir_path_from_full_path(const char *);

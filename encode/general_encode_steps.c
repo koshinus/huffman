@@ -6,6 +6,7 @@
 
 int encode_file(const char *fpath, char text, char debug)
 {
+    printf("%d\n", 2);
     FILE *fin;
     if(text) fin = fopen(fpath, "r");
     else fin = fopen(fpath, "rb");
@@ -22,17 +23,24 @@ int encode_file(const char *fpath, char text, char debug)
 
     //https://en.wikipedia.org/wiki/Huffman_coding
     //Algorithm steps:
-    huffman_encode_tree *het = make_encode_tree(buffer, symbols_with_not_null_freq);			//1
+    huffman_encode_tree *het = make_encode_tree(buffer, symbols_with_not_null_freq);		//1
+    printf("%d\n", 3);
     huffman_algorithm(het, symbols_with_not_null_freq);                                     //2.1 - 2.3
+    printf("%d\n", 4);
 
     //Getting huffman codes for leafs
     get_huffman_codes_for_symbols(het, het->nodes_number-(short)1);
+    printf("%d\n", 5);
 
     //Encode file
     encode(fin, het, fpath);
+    printf("%d\n", 6);
 
     if(debug)
-        write_debug_info(het, fpath, buffer, symbols_with_not_null_freq);
+    {
+        //rewind(fin);
+        write_debug_info(fin, het, fpath, buffer, symbols_with_not_null_freq);
+    }
 
     free(het);
     fclose(fin);
@@ -51,8 +59,8 @@ void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
         het->tree[right].free_and_is_leaf |= 2;								// 2.1
         huffman_encode_node node
                 = make_encode_node(het->tree[ left].frequency +				// 2.2
-                                   het->tree[right].frequency,	                    // 2.2
-                                   0, left, right, 0, '-');						// 2.2
+                                   het->tree[right].frequency,	            // 2.2
+                                   0, left, right, 0, '-');					// 2.2
         het->tree[het->nodes_number] = node;					    		// 2.3
         het->nodes_number++;
     }
@@ -65,6 +73,8 @@ void get_huffman_codes_for_symbols(huffman_encode_tree *het, short parent)
     else
     {
         get_huffman_codes_step(het, parent, l, 0);
+        get_huffman_codes_for_symbols(het, l);
         get_huffman_codes_step(het, parent, r, 1);
+        get_huffman_codes_for_symbols(het, r);
     }
 }

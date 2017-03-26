@@ -30,15 +30,7 @@ void decode_file(const char *fpath, char text)
     {
         free(dir_path); free(decode_path);
         huffman_decode_tree *hdt = make_decode_tree(fin);
-        int c = EOF;
-        unsigned short root = hdt->nodes_number - 1;
-        unsigned short position = root;
-        while ( (c = fgetc(fin)) != EOF)
-        {
-            char ch = tree_search(hdt, (unsigned char)c, &position, root, 0);
-            if(position != root) continue;
-            else fprintf(fout, "%c", ch);
-        }
+        decode(hdt, fin, fout);
         free(hdt);
         fclose(fin); fclose(fout);
     }

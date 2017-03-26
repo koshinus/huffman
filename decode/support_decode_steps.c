@@ -4,21 +4,52 @@
 
 #include "decode.h"
 
-char tree_search(huffman_decode_tree *hdt, unsigned char code, short *pos, unsigned short root, char readed_bits)
+void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout)
 {
-    short l = hdt->tree[*pos].left, r = hdt->tree[*pos].right;
-    if(l == -1)
+    /*TODO: add removing of last character from file "fout"
+     * */
+    int c = 1;
+    short root = hdt->nodes_number - 1, position = root;
+    char bits_read = 0;
+    unsigned char ch = (unsigned char)c;
+    while ( 1 )
     {
-        char c = hdt->tree[*pos].symbol;
-        *pos = root;
-        return c;
+        if(bits_read == 0)
+        {
+            c = fgetc(fin);
+            ch = (unsigned char)c;
+        }
+        if(c == EOF) break;
+        position = tree_search(hdt, &ch, position, root, &bits_read);
+        if(hdt->tree[position].left == -1)
+        {
+            fprintf(fout, "%c", hdt->tree[position].symbol);
+            position = root;
+        }
     }
-    else if(readed_bits == 8) return '-';
+}
+
+short tree_search(huffman_decode_tree *hdt, unsigned char *code, short pos, short root, char *bits_read)
+{
+    short l = hdt->tree[pos].left, r = hdt->tree[pos].right;
+    if(l == -1) return pos;
+    else if((*bits_read) == 8)
+    {
+        *bits_read = 0;
+        return pos;
+    }
     else
     {
-        readed_bits++;
-
-        if(code << 7 == 0) return tree_search(hdt, code << 1, &l, root, readed_bits);
-        else return tree_search(hdt, code << 1, &r, root, readed_bits);
+        (*bits_read)++;
+        if((*code & (1 << 7)) == 0)
+        {
+            *code <<= 1;
+            return tree_search(hdt, code, l, root, bits_read);
+        }
+        else
+        {
+            *code <<= 1;
+            return tree_search(hdt, code, r, root, bits_read);
+        }
     }
 }
