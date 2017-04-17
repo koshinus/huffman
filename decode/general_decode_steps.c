@@ -4,7 +4,7 @@
 
 #include "decode.h"
 
-void decode_file(const char *fpath, char text)
+void decode_file(const char *fpath, int8_t text)
 {
     FILE *fin, *fout;
     char *dir_path = get_dir_path_from_full_path(fpath);

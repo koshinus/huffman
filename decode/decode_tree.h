@@ -9,17 +9,17 @@
 
 typedef struct huffman_decode_node_
 {
-    short left, right;
+    int16_t left, right;
     char symbol;
 } huffman_decode_node;
 
 typedef struct huffman_decode_tree_
 {
-    unsigned short nodes_number;
+    uint16_t nodes_number;
     huffman_decode_node tree[];
 } huffman_decode_tree;
 
-huffman_decode_node make_decode_node(short, short, char);
+huffman_decode_node make_decode_node(int16_t, int16_t, char);
 huffman_decode_tree * make_decode_tree(FILE *);
 
 #endif //HUFFMAN_DECODE_TREE_H

@@ -5,7 +5,7 @@
 #include "encode.h"
 
 void write_debug_info(FILE *f, huffman_encode_tree *het, const char *fpath,
-                      unsigned long long *buffer, unsigned short symbols_with_not_null_freq)
+                      uint64_t *buffer, uint16_t symbols_with_not_null_freq)
 {
 
     char *dir_path = get_dir_path_from_full_path(fpath);
@@ -33,7 +33,7 @@ void write_debug_info(FILE *f, huffman_encode_tree *het, const char *fpath,
     //Writing frequency statistic to log file
     fprintf(log, "Frequency statistic for the file %s.\n", fpath);
     for(int i = 0; i < BUFFER_SIZE; i++)
-        fprintf(log, "%c - %lli\n", (char)i, buffer[i]);
+        fprintf(log, "%c - %"SCNd64"\n", (char)i, buffer[i]);
 
     fprintf(log, "The number of characters encountered in the file at least once: %d", symbols_with_not_null_freq);
 
@@ -53,11 +53,11 @@ void write_symbols_codes(FILE *log, huffman_encode_tree *het)
 {
     for(int i = 0; i < het->nodes_number/2 + 1; i++)
     {
-        unsigned short last_code_bytes = het->tree[i].code_size % LL_SIZE;
-        unsigned short limit = LIMIT(het->tree[i].code_size / LL_SIZE);
+        uint16_t last_code_bytes = (uint16_t) (het->tree[i].code_size % LL_SIZE);
+        uint16_t limit = (uint16_t) LIMIT(het->tree[i].code_size / LL_SIZE);
         //char *s = (char *)malloc((LL_SIZE + 1)*sizeof(char)); s[LL_SIZE] = '\0';
         char *s;
-        fprintf(log, "%c (code length = %3hi) - ", het->tree[i].symbol, het->tree[i].code_size);
+        fprintf(log, "%c (code length = %3"SCNd16") - ", het->tree[i].symbol, het->tree[i].code_size);
         for (int j = 0; j < limit; j++)
             fprintf(log, "%s", (s = to_binary(het->tree[i].code[j], LL_SIZE)));
         if(limit > 0) free(s);
@@ -72,12 +72,12 @@ void make_visualization(FILE *f, huffman_encode_tree *het)
     fprintf(f, "from graphviz import Digraph\n\n"
             "dot = Digraph('Huffman Tree')\ndot.attr('node', shape='box')\n");
     for (int i = 0; i < het->nodes_number; i++)
-        fprintf(f, "dot.node(str(%d), label=str(%d) + '\\n_______\\n' + 'freq=' + str(%li))\n",
-                i, i, het->tree[i].frequency);
+        fprintf(f, "dot.node(str(%d), label=str(%d) + '\\n_______\\n' + 'freq=' + "
+                        "str(%"SCNd64"))\n", i, i, het->tree[i].frequency);
     for (int i = het->nodes_number/2 + 1; i < het->nodes_number; i++)
     {
-        fprintf(f, "dot.edge(str(%d), str(%d), label='0')\n", i, het->tree[i].left);
-        fprintf(f, "dot.edge(str(%d), str(%d), label='1')\n", i, het->tree[i].right);
+        fprintf(f, "dot.edge(str(%d), str(%"SCNd16"), label='0')\n", i, het->tree[i].left);
+        fprintf(f, "dot.edge(str(%d), str(%"SCNd16"), label='1')\n", i, het->tree[i].right);
     }
     fprintf(f, "dot.render('huffman_tree', None, True)\n");
     fclose(f);
@@ -87,13 +87,13 @@ void info_encode(FILE *f, FILE *log, huffman_encode_tree *het)
 {
     write_tree_to_file(log, het);
     rewind(f);
-    int c = EOF;
+    int c;
     char ch = 0;
-    unsigned short bits_write_in_ch = 0;
+    uint16_t bits_write_in_ch = 0;
     while( (c = fgetc(f)) != EOF )
     {
         huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
-        unsigned short limit = LIMIT(node->code_size/LL_SIZE);
+        uint16_t limit = (uint16_t) LIMIT(node->code_size/LL_SIZE);
         for(int i = 0; i < limit; i++)
             for(int j = 0; j < LL_SIZE; j++)
                 info_encode_step(log, node, &bits_write_in_ch, &ch, i, j, 0);
@@ -103,18 +103,18 @@ void info_encode(FILE *f, FILE *log, huffman_encode_tree *het)
     if(bits_write_in_ch != 0)
     {
         char *s;
-        fprintf(log, "%d", bits_write_in_ch);
-        fprintf(log, "%s", (s = to_binary((unsigned long long)ch, bits_write_in_ch)));
+        fprintf(log, "%"SCNd16, bits_write_in_ch);
+        fprintf(log, "%s", (s = to_binary((uint64_t)ch, bits_write_in_ch)));
         free(s);
     }
 }
 
-void info_encode_step(FILE *f, huffman_encode_node *node, unsigned short *bits_write_in_ch,
-                 char *ch, int node_code_num, int count, char last)
+void info_encode_step(FILE *f, huffman_encode_node *node, uint16_t *bits_write_in_ch,
+                 char *ch, int node_code_num, int count, int8_t last)
 {
     if(*bits_write_in_ch == BYTE_SIZE)
     {
-        char *s = to_binary((unsigned long long)(*ch), BYTE_SIZE);
+        char *s = to_binary((uint64_t)(*ch), BYTE_SIZE);
         fprintf(f, "%s", s);
         free(s);
         *ch = 0;

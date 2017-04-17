@@ -9,7 +9,7 @@
 #include<stddef.h>
 #include<string.h>
 #include<stdlib.h>
-#include<stdint.h>
+#include<inttypes.h>
 
 #define         BYTE_SIZE 8
 #define           LL_SIZE 64
@@ -33,9 +33,9 @@ char file_info[2][4] = {{"r", "rb", "r+", "rb+"},
                         {"w", "wb", "w+", "wb+"}};
 */
 
-char * to_binary(unsigned long long, unsigned short);
-void get_frequency_table(FILE *, unsigned long long *);
-unsigned short count_symbols_with_not_null_frequency(unsigned long long *);
+char * to_binary(uint64_t, uint16_t);
+void get_frequency_table(FILE *, uint64_t *);
+uint16_t count_symbols_with_not_null_frequency(uint64_t *);
 char * get_dir_path_from_full_path(const char *);
 char * concat(const char *, const char *);
 

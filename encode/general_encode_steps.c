@@ -4,7 +4,7 @@
 
 #include "encode.h"
 
-int encode_file(const char *fpath, char text, char debug)
+int encode_file(const char *fpath, int8_t text, int8_t debug)
 {
     printf("%d\n", 2);
     FILE *fin;
@@ -16,10 +16,10 @@ int encode_file(const char *fpath, char text, char debug)
         exit(1);
     }
     //Getting frequency table from text or binary file
-    unsigned long long buffer[BUFFER_SIZE];
+    uint64_t buffer[BUFFER_SIZE];
     get_frequency_table(fin, buffer);
 
-    unsigned short symbols_with_not_null_freq = count_symbols_with_not_null_frequency(buffer);
+    uint16_t symbols_with_not_null_freq = count_symbols_with_not_null_frequency(buffer);
 
     //https://en.wikipedia.org/wiki/Huffman_coding
     //Algorithm steps:
@@ -29,7 +29,7 @@ int encode_file(const char *fpath, char text, char debug)
     printf("%d\n", 4);
 
     //Getting huffman codes for leafs
-    get_huffman_codes_for_symbols(het, het->nodes_number-(short)1);
+    get_huffman_codes_for_symbols(het, het->nodes_number-1);
     printf("%d\n", 5);
 
     //Encode file
@@ -48,11 +48,11 @@ int encode_file(const char *fpath, char text, char debug)
     return 0;
 }
 
-void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
+void huffman_algorithm(huffman_encode_tree *het, uint16_t count)
 {
     while(2*count - het->nodes_number > 1)			                        // 2
     {
-        short left, right;
+        int16_t left, right;
         left  = get_minimum(het);											// 2.1
         het->tree[ left].free_and_is_leaf |= 2;								// 2.1
         right = get_minimum(het);											// 2.1
@@ -66,9 +66,9 @@ void huffman_algorithm(huffman_encode_tree *het, unsigned short count)
     }
 }
 
-void get_huffman_codes_for_symbols(huffman_encode_tree *het, short parent)
+void get_huffman_codes_for_symbols(huffman_encode_tree *het, int16_t parent)
 {
-    short l = het->tree[parent].left, r = het->tree[parent].right;
+    int16_t l = het->tree[parent].left, r = het->tree[parent].right;
     if(l == -1) return;
     else
     {

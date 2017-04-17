@@ -9,10 +9,10 @@
 
 typedef struct huffman_encode_node_
 {
-    unsigned long long *code;           //Huffman code for symbol
-    unsigned long frequency;		    //Summary frequency of node
-	unsigned short code_size;		    //Number of useful bits in "code" variable
-    short left, right;			        //Left and right parents of node
+    uint64_t *code;                     //Huffman code for symbol
+    uint64_t  frequency;		        //Summary frequency of node
+	uint16_t code_size;		            //Number of useful bits in "code" variable
+    int16_t left, right;			    //Left and right parents of node
     unsigned char free_and_is_leaf,	    //Variable in binary format is equal:
 			                            //00000abc c = 1 if node is a leaf, else c = 0
 			                            //00000abc b = 1 if node have been used as a parent before, else b = 0
@@ -22,12 +22,12 @@ typedef struct huffman_encode_node_
 
 typedef struct huffman_encode_tree_
 {
-    unsigned short nodes_number;
+    uint16_t nodes_number;
     huffman_encode_node tree[];
 } huffman_encode_tree;
 
-huffman_encode_node make_encode_node(unsigned long, unsigned short, short, short, unsigned char, unsigned char);
-huffman_encode_tree * make_encode_tree(unsigned long long *, unsigned short);
+huffman_encode_node make_encode_node(uint64_t, uint16_t, int16_t, int16_t, unsigned char, unsigned char);
+huffman_encode_tree * make_encode_tree(uint64_t *, uint16_t);
 
 
 #endif //HUFFMAN_HUFFMAN_TREE_H

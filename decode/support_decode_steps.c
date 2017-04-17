@@ -8,19 +8,21 @@ void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout)
 {
     /*TODO: add removing of last character from file "fout"
      * */
-    int c = 1;
-    short root = hdt->nodes_number - 1, position = root;
-    char bits_read = 0;
-    unsigned char ch = (unsigned char)c;
+    int32_t c = fgetc(fin);
+    if(c == EOF) return;
+    int16_t root = hdt->nodes_number - 1, position = root;
+    int8_t bits_read = 0;
+    unsigned char cur = (unsigned char)c, prev;
     while ( 1 )
     {
         if(bits_read == 0)
         {
+            prev = cur;
             c = fgetc(fin);
-            ch = (unsigned char)c;
+            cur = (unsigned char)c;
         }
         if(c == EOF) break;
-        position = tree_search(hdt, &ch, position, root, &bits_read);
+        position = tree_search(hdt, &prev, position, root, &bits_read);
         if(hdt->tree[position].left == -1)
         {
             fprintf(fout, "%c", hdt->tree[position].symbol);
@@ -29,9 +31,9 @@ void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout)
     }
 }
 
-short tree_search(huffman_decode_tree *hdt, unsigned char *code, short pos, short root, char *bits_read)
+int16_t tree_search(huffman_decode_tree *hdt, unsigned char *code, int16_t pos, int16_t root, int8_t *bits_read)
 {
-    short l = hdt->tree[pos].left, r = hdt->tree[pos].right;
+    int16_t l = hdt->tree[pos].left, r = hdt->tree[pos].right;
     if(l == -1) return pos;
     else if((*bits_read) == 8)
     {

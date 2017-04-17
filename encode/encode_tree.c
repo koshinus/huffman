@@ -4,11 +4,11 @@
 
 #include "encode_tree.h"
 
-huffman_encode_node make_encode_node(unsigned long freq, unsigned short cs,
-                                     short l, short r, unsigned char leaf, unsigned char symb)
+huffman_encode_node make_encode_node(uint64_t freq, uint16_t cs,
+                                     int16_t l, int16_t r, unsigned char leaf, unsigned char symb)
 {
     huffman_encode_node node;
-    node.code = (unsigned long long *)calloc(1, sizeof(unsigned long long));
+    node.code = (uint64_t *)calloc(1, sizeof(uint64_t));
     node.frequency = freq;
     node.code_size = cs;
     node.left = l;
@@ -18,11 +18,11 @@ huffman_encode_node make_encode_node(unsigned long freq, unsigned short cs,
     return node;
 }
 
-huffman_encode_tree * make_encode_tree(unsigned long long *frequency_table, unsigned short table_size)
+huffman_encode_tree * make_encode_tree(uint64_t *frequency_table, uint16_t table_size)
 {
     size_t size = offsetof(huffman_encode_tree, tree) + sizeof(huffman_encode_node) * (2 * table_size - 1);
     huffman_encode_tree *het = (huffman_encode_tree *) malloc(size);
-    unsigned short tree_count = 0;
+    uint16_t tree_count = 0;
     for(int i = 0; i < BUFFER_SIZE; i++)
     {
         if(frequency_table[i] != 0)

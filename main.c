@@ -10,8 +10,8 @@ int main(int argc, char *argv[])
         printf("Incorrect input! Follow the example!");
         exit(1);
     }
-    printf("%d\n", 1);
-    char info = 0, is_text = 1;
+    //printf("%d\n", 1);
+    int8_t info = 0, is_text = 1;
     for (int i = 2; i < argc - 1; i++)
     {
         if(strcmp(argv[i], "-b")) is_text = 0;

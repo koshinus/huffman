@@ -7,8 +7,8 @@
 
 #include "decode_tree.h"
 
-short tree_search(huffman_decode_tree *, unsigned char *, short, short, char *);
-void decode_file(const char *, char);
+int16_t tree_search(huffman_decode_tree *, unsigned char *, int16_t, int16_t, int8_t *);
+void decode_file(const char *, int8_t);
 void decode(huffman_decode_tree *, FILE *, FILE *);
 
 #endif //HUFFMAN_DECODE_H
