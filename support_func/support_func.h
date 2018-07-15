@@ -14,6 +14,15 @@
 #define         BYTE_SIZE 8
 #define           LL_SIZE 64
 #define       BUFFER_SIZE 256
+#define       IN_BUFFER_SIZE 4*1024
+#define       OUT_BUFFER_SIZE 4*1024
+
+// Number of handled bytes in decode/encode buffers
+uint16_t in_bytes_count;
+uint16_t out_bytes_count;
+
+int8_t in_buffer[IN_BUFFER_SIZE];
+int8_t out_buffer[OUT_BUFFER_SIZE];
 
 /*
 #define         TEXT_READ 11

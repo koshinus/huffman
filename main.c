@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
     int8_t info = 0, is_text = 1;
     for (int i = 2; i < argc - 1; i++)
     {
-        if(strcmp(argv[i], "-b")) is_text = 0;
-        if(strcmp(argv[i], "-info")) info = 1;
+        if(!strcmp(argv[i], "-b")) is_text = 0;
+        if(!strcmp(argv[i], "-info")) info = 1;
     }
     //if(strcmp(argv[1], "-en") == 0)
     if(!strcmp(argv[1], "-en"))

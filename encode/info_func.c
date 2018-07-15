@@ -36,7 +36,7 @@ void write_debug_info(FILE *f, huffman_encode_tree *het, const char *fpath,
         fprintf(log, "%c - %"SCNd64"\n", (char)i, buffer[i]);
 
     fprintf(log, "The number of characters encountered in the file at least once: %d", symbols_with_not_null_freq);
-
+    fprintf(log, "\n");
     write_symbols_codes(log, het);
 
     //Visualize huffman tree
@@ -57,7 +57,10 @@ void write_symbols_codes(FILE *log, huffman_encode_tree *het)
         uint16_t limit = (uint16_t) LIMIT(het->tree[i].code_size / LL_SIZE);
         //char *s = (char *)malloc((LL_SIZE + 1)*sizeof(char)); s[LL_SIZE] = '\0';
         char *s;
-        fprintf(log, "%c (code length = %3"SCNd16") - ", het->tree[i].symbol, het->tree[i].code_size);
+        if(het->tree[i].symbol == '\n')
+            fprintf(log, "\\n (code length = %3"SCNd16") - ", het->tree[i].code_size);
+        else
+            fprintf(log, "%c (code length = %3"SCNd16") - ", het->tree[i].symbol, het->tree[i].code_size);
         for (int j = 0; j < limit; j++)
             fprintf(log, "%s", (s = to_binary(het->tree[i].code[j], LL_SIZE)));
         if(limit > 0) free(s);
@@ -90,8 +93,11 @@ void info_encode(FILE *f, FILE *log, huffman_encode_tree *het)
     int c;
     char ch = 0;
     uint16_t bits_write_in_ch = 0;
-    while( (c = fgetc(f)) != EOF )
+    while( 1 )
     {
+        c = fgetc(f);
+        if (c == EOF)
+            break;
         huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
         uint16_t limit = (uint16_t) LIMIT(node->code_size/LL_SIZE);
         for(int i = 0; i < limit; i++)
@@ -103,10 +109,11 @@ void info_encode(FILE *f, FILE *log, huffman_encode_tree *het)
     if(bits_write_in_ch != 0)
     {
         char *s;
-        fprintf(log, "%"SCNd16, bits_write_in_ch);
+        //fprintf(log, "%"SCNd16, bits_write_in_ch);
         fprintf(log, "%s", (s = to_binary((uint64_t)ch, bits_write_in_ch)));
         free(s);
     }
+    fclose(log);
 }
 
 void info_encode_step(FILE *f, huffman_encode_node *node, uint16_t *bits_write_in_ch,

@@ -80,11 +80,20 @@ void encode(FILE *f, huffman_encode_tree *het, const char *fpath)
         free(dir_path); free(out_path);
         write_tree_to_file(fout, het);
         rewind(f);
+        //uint64_t file_size = 0;
         int c;
         char ch = 0;
         uint16_t bits_write_in_ch = 0;
         while( (c = fgetc(f)) != EOF )
         {
+            /*
+            file_size++;
+            if (file_size == 896376)
+            {
+                8990;
+                printf("Why not?\n");
+            }
+            */
             huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
             uint16_t limit = (uint16_t) LIMIT(node->code_size/LL_SIZE);
             for(int i = 0; i < limit; i++)
@@ -95,8 +104,8 @@ void encode(FILE *f, huffman_encode_tree *het, const char *fpath)
         }
         if(bits_write_in_ch != 0)
         {
-            fprintf(fout, "%"SCNd16, bits_write_in_ch - 1);
-            fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch - 1));
+            //fprintf(fout, "%"SCNd16, bits_write_in_ch - 1);
+            fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch));
         }
         fclose(fout);
     }
