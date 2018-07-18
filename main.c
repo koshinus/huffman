@@ -1,5 +1,6 @@
 #include "encode/encode.h"
 #include "decode/decode.h"
+#include <omp.h>
 
 int main(int argc, char *argv[])
 {
@@ -18,8 +19,19 @@ int main(int argc, char *argv[])
     }
     //if(strcmp(argv[1], "-en") == 0)
     if(!strcmp(argv[1], "-en"))
+    {
+        double start = omp_get_wtime();
         encode_file(argv[argc - 1], is_text, info);
-    else decode_file(argv[argc - 1], is_text);
+        double end = omp_get_wtime();
+        printf("File was encoded in %lf ms time.\n", end - start);
+    }
+    else
+    {
+        double start = omp_get_wtime();
+        decode_file(argv[argc - 1], is_text);
+        double end = omp_get_wtime();
+        printf("File was decoded in %lf ms time.\n", end - start);
+    }
 
     return 0;
 }

@@ -1,0 +1,5 @@
+Without buffering:
+./huffman -en in.txt 
+File was encoded in 0.118694 ms time.
+./huffman -de in.txt.huf 
+File was decoded in 0.047991 ms time.

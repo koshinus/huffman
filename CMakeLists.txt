@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 project(huffman)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c99 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c99 -Wall -fopenmp")
 
 set(SOURCE_FILES main.c
         encode/encode_tree.c encode/encode_tree.h
@@ -14,3 +14,4 @@ set(SOURCE_FILES main.c
 #set(SOURCE_FILES test.c)
 
 add_executable(huffman ${SOURCE_FILES})
+target_link_libraries(huffman gomp)
