@@ -6,10 +6,11 @@
 
 int encode_file(const char *fpath, int8_t text, int8_t debug)
 {
-    printf("%d\n", 2);
     FILE *fin;
-    if(text) fin = fopen(fpath, "r");
-    else fin = fopen(fpath, "rb");
+    if(text)
+        fin = fopen(fpath, "r");
+    else
+        fin = fopen(fpath, "rb");
     if(fin == NULL)
     {
         printf("Impossible to open file %s.\n", fpath);
@@ -24,17 +25,13 @@ int encode_file(const char *fpath, int8_t text, int8_t debug)
     //https://en.wikipedia.org/wiki/Huffman_coding
     //Algorithm steps:
     huffman_encode_tree *het = make_encode_tree(buffer, symbols_with_not_null_freq);		//1
-    printf("%d\n", 3);
     huffman_algorithm(het, symbols_with_not_null_freq);                                     //2.1 - 2.3
-    printf("%d\n", 4);
 
     //Getting huffman codes for leafs
     get_huffman_codes_for_symbols(het, het->nodes_number-1);
-    printf("%d\n", 5);
 
     //Encode file
     encode(fin, het, fpath);
-    printf("%d\n", 6);
 
     if(debug)
     {

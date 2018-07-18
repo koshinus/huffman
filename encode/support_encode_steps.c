@@ -66,34 +66,24 @@ void write_tree_to_file(FILE *f, huffman_encode_tree *het)
 
 void encode(FILE *f, huffman_encode_tree *het, const char *fpath)
 {
-    char *dir_path = get_dir_path_from_full_path(fpath);
-    char *out_path = concat(dir_path, "out.huf");
+    char *out_path = concat(fpath, ".huf");
     FILE *fout;
     if ( (fout = fopen(out_path, "w")) == NULL )
     {
         printf("Impossible to open file %s.\n", out_path);
-        free(dir_path); free(out_path);
+        free(out_path);
         exit(1);
     }
     else
     {
-        free(dir_path); free(out_path);
+        free(out_path);
         write_tree_to_file(fout, het);
         rewind(f);
-        //uint64_t file_size = 0;
         int c;
         char ch = 0;
         uint16_t bits_write_in_ch = 0;
         while( (c = fgetc(f)) != EOF )
         {
-            /*
-            file_size++;
-            if (file_size == 896376)
-            {
-                8990;
-                printf("Why not?\n");
-            }
-            */
             huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)c);
             uint16_t limit = (uint16_t) LIMIT(node->code_size/LL_SIZE);
             for(int i = 0; i < limit; i++)
@@ -104,8 +94,7 @@ void encode(FILE *f, huffman_encode_tree *het, const char *fpath)
         }
         if(bits_write_in_ch != 0)
         {
-            //fprintf(fout, "%"SCNd16, bits_write_in_ch - 1);
-            fprintf(fout, "%c", ch << (BYTE_SIZE - bits_write_in_ch));
+            fputc(ch << (BYTE_SIZE - bits_write_in_ch), fout);
         }
         fclose(fout);
     }
@@ -116,7 +105,7 @@ void encode_step(FILE *f, huffman_encode_node *node, uint16_t *bits_write_in_ch,
 {
     if(*bits_write_in_ch == BYTE_SIZE)
     {
-        fprintf(f, "%c", *ch);
+        fputc(*ch, f);
         *ch = 0;
         *bits_write_in_ch = 0;
     }
