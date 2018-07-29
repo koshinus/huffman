@@ -144,7 +144,7 @@ void encode_step(FILE *f, huffman_encode_node *node, uint16_t *bits_write_in_ch,
         //fputc(*ch, f);
         out_bytes_count++;
         out_buffer[out_bytes_count] = *ch;
-        if(out_bytes_count >= OUT_BUFFER_SIZE)
+        if(out_bytes_count == OUT_BUFFER_SIZE)
         {
             fwrite(out_buffer, sizeof(int8_t), out_bytes_count, f);
             out_bytes_count = 0;
