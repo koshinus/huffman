@@ -29,23 +29,7 @@ uint64_t out_bytes_count;
 int8_t  in_buffer[ IN_BUFFER_SIZE];
 int8_t out_buffer[OUT_BUFFER_SIZE];
 
-/*
-#define         TEXT_READ 11
-#define       BINARY_READ 12
-#define        TEXT_WRITE 21
-#define      BINARY_WRITE 22
-#define   TEXT_READ_WRITE 13
-#define BINARY_READ_WRITE 14
-#define      TEXT_REWRITE 23
-#define    BINARY_REWRITE 24
-*/
-
 #define LIMIT(X) ((X > 0)? (X-1): (0))
-
-/*
-char file_info[2][4] = {{"r", "rb", "r+", "rb+"},
-                        {"w", "wb", "w+", "wb+"}};
-*/
 
 char * to_binary(uint64_t, uint16_t);
 void get_frequency_table(FILE *, uint64_t *);
