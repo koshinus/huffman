@@ -18,7 +18,7 @@ typedef struct huffman_encode_node_
 			                            //00000abc b = 1 if node have been used as a parent before, else b = 0
 			                            //00000abc a = 1 if node have been visited, else a = 0
     symbol;							    //Symbol in node if node is leaf, else - '-'
-} huffman_encode_node;
+} __attribute__((packed, aligned(1))) huffman_encode_node;
 
 typedef struct huffman_encode_tree_
 {

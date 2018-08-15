@@ -11,7 +11,7 @@ typedef struct huffman_decode_node_
 {
     int16_t left, right;
     char symbol;
-} huffman_decode_node;
+} __attribute__((packed, aligned(1))) huffman_decode_node;
 
 typedef struct huffman_decode_tree_
 {
