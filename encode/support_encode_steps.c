@@ -33,6 +33,7 @@ huffman_encode_node * get_huffman_node_by_symbol(huffman_encode_tree *het, unsig
     for(int i = 0; i < het->nodes_number/2 + 1; i++)
         if(het->tree[i].symbol == symbol)
             return &het->tree[i];
+    return NULL;
 }
 
 int16_t get_minimum(huffman_encode_tree *het)
@@ -55,23 +56,24 @@ int16_t get_minimum(huffman_encode_tree *het)
 
 void write_tree_to_file(FILE *f, huffman_encode_tree *het)
 {
-    uint64_t written_bytes = 0;
-    int8_t symbol;
-    out_bytes_count = sprintf(out_buffer, "%"SCNd16"\n", het->nodes_number);
-    for(int i = 0; i < het->nodes_number; i++)
+    out_bytes_count = sizeof(het->nodes_number);
+    int8_t decode_node_size = sizeof(het->tree[0].symbol) + sizeof(het->tree[0].left) + sizeof(het->tree[0].right);
+    out_buffer[0] = ((int8_t *)&het->nodes_number)[0];
+    out_buffer[1] = ((int8_t *)&het->nodes_number)[1];
+    for(uint16_t i = 0; i < het->nodes_number; i++)
     {
-        if(i < het->nodes_number/2 + 1)
-            symbol = het->tree[i].symbol;
-        else
-            symbol = '-';
-        written_bytes = sprintf(out_buffer + out_bytes_count, "%c %"SCNd16" %"SCNd16"\n", symbol, het->tree[i].left, het->tree[i].right);
-        if(OUT_BUFFER_SIZE - out_bytes_count < 2 * written_bytes)
+        huffman_encode_node * node = &het->tree[i];
+        out_buffer[out_bytes_count] = node->symbol;
+        out_buffer[out_bytes_count + 1] = ((int8_t *)&node->left)[0];
+        out_buffer[out_bytes_count + 2] = ((int8_t *)&node->left)[1];
+        out_buffer[out_bytes_count + 3] = ((int8_t *)&node->right)[0];
+        out_buffer[out_bytes_count + 4] = ((int8_t *)&node->right)[1];
+        out_bytes_count += decode_node_size;
+        if(OUT_BUFFER_SIZE - out_bytes_count < decode_node_size)
         {
-            fwrite(out_buffer, sizeof(int8_t), out_bytes_count + written_bytes, f);
+            fwrite(out_buffer, sizeof(int8_t), out_bytes_count, f);
             out_bytes_count = 0;
         }
-        else
-            out_bytes_count += written_bytes;
     }
 }
 
@@ -98,6 +100,11 @@ void encode(FILE *fin, huffman_encode_tree *het, const char *fpath)
             for(uint64_t k = 0; k < in_bytes_count; k++)
             {
                 huffman_encode_node *node = get_huffman_node_by_symbol(het, (unsigned char)in_buffer[k]);
+                if (!node)
+                {
+                    printf("Something terrible is happening: cannot find node of tree! File will not be encoded completely!\n");
+                    return;
+                }
                 uint16_t limit = (uint16_t) LIMIT(node->code_size/LL_SIZE);
                 for(int i = 0; i < limit; i++)
                     for(int j = 0; j < LL_SIZE; j++)
