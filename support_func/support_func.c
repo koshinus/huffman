@@ -56,3 +56,12 @@ char * get_dir_path_from_full_path(const char *full_path)
     dir_path = strndup(full_path, last_slash - full_path + 1);
     return dir_path;
 }
+
+uint64_t position_in_buffer(uint16_t nodes_number, uint8_t decode_node_size)
+{
+    uint64_t tree_full_size = nodes_number * decode_node_size + sizeof(nodes_number);
+    //printf("%d-%d-%d-%d\n", IN_BUFFER_SIZE, tree_full_size, tree_full_size % (IN_BUFFER_SIZE), tree_full_size / (IN_BUFFER_SIZE));
+    return IN_BUFFER_SIZE < tree_full_size ?
+                tree_full_size % IN_BUFFER_SIZE :
+                tree_full_size;
+}

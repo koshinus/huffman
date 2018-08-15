@@ -19,8 +19,8 @@
  * THERE IS NO CHECKS FOR RANGE WHEN WRITING
  * ENCODING TREE TO OUTPUT BUFFER
 */
-#define        IN_BUFFER_SIZE 4*1024
-#define       OUT_BUFFER_SIZE 4*1024
+#define        IN_BUFFER_SIZE (4*1024)
+#define       OUT_BUFFER_SIZE (4*1024)
 
 // Number of handled bytes in decode/encode buffers
 uint64_t  in_bytes_count;
@@ -36,5 +36,6 @@ void get_frequency_table(FILE *, uint64_t *);
 uint16_t count_symbols_with_not_null_frequency(uint64_t *);
 char * get_dir_path_from_full_path(const char *);
 char * concat(const char *, const char *);
+uint64_t position_in_buffer(uint16_t nodes_number, uint8_t decode_node_size);
 
 #endif //HUFFMAN_DEBUG_H
