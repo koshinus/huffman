@@ -55,12 +55,18 @@ int16_t get_minimum(huffman_encode_tree *het)
 
 void write_tree_to_file(FILE *f, huffman_encode_tree *het)
 {
-    fprintf(f, "%"SCNd16"\n", het->nodes_number);
+    fputc(((char *)&het->nodes_number)[0], f);
+    fputc(((char *)&het->nodes_number)[1], f);
     for(int i = 0; i < het->nodes_number; i++)
     {
         if(i < het->nodes_number/2 + 1)
-            fprintf(f, "%c %"SCNd16" %"SCNd16"\n", het->tree[i].symbol, het->tree[i].left, het->tree[i].right);
-        else fprintf(f, "- %"SCNd16" %"SCNd16"\n", het->tree[i].left, het->tree[i].right);
+            fputc(het->tree[i].symbol, f);
+        else
+            fputc('-', f);
+        fputc(((char *)&het->tree[i].left)[0], f);
+        fputc(((char *)&het->tree[i].left)[1], f);
+        fputc(((char *)&het->tree[i].right)[0], f);
+        fputc(((char *)&het->tree[i].right)[1], f);
     }
 }
 
