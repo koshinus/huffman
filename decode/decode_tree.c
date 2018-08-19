@@ -41,7 +41,10 @@ huffman_decode_tree * make_decode_tree(FILE *f)
             i += decode_node_size;
             hdt->tree[nodes_handled++] = make_decode_node(left, right, symbol);
             if(nodes_handled == nodes_number)
+            {
+                some_var = i;
                 return hdt;
+            }
             if(in_bytes_count - i < decode_node_size)
             {
                 for(uint64_t j = 0; j < in_bytes_count - i; j++)
