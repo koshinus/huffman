@@ -4,7 +4,7 @@
 
 #include "decode.h"
 
-void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout)
+void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout, int8_t text)
 {
     int c = 1;
     short root = hdt->nodes_number - 1, position = root;
@@ -20,11 +20,12 @@ void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout)
             {
                 if (in_bytes_count != IN_BUFFER_SIZE)
                 {
-                    c = in_buffer[i];
                     position = tree_search(hdt, (unsigned char *)(&c), position, root, &bits_read);
                     out_buffer[out_bytes_count++] = hdt->tree[position].symbol;
-                    // Need to avoid "\ No newline at end of file" when compare with "diff" utility
-                    //out_buffer[out_bytes_count++] = '\n';
+                    // Need to avoid "\ No newline at end of file" for text file
+                    // TODO: analize problem more carefully and remove the crutch
+                    if (text)
+                        out_buffer[out_bytes_count++] = '\n';
                     fwrite(out_buffer, sizeof(int8_t), out_bytes_count, fout);
                     return;
                 }

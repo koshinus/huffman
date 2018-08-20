@@ -9,6 +9,6 @@
 
 int16_t tree_search(huffman_decode_tree *, unsigned char *, int16_t, int16_t, int8_t *);
 void decode_file(const char *, int8_t);
-void decode(huffman_decode_tree *, FILE *, FILE *);
+void decode(huffman_decode_tree *, FILE *, FILE *, int8_t);
 
 #endif //HUFFMAN_DECODE_H

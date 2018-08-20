@@ -30,7 +30,7 @@ void decode_file(const char *fpath, int8_t text)
     {
         free(dir_path); free(decode_path);
         huffman_decode_tree *hdt = make_decode_tree(fin);
-        decode(hdt, fin, fout);
+        decode(hdt, fin, fout, text);
         free(hdt);
         fclose(fin); fclose(fout);
     }
