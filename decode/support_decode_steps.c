@@ -13,24 +13,18 @@ void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout)
     uint64_t i = position_in_buffer(hdt->nodes_number, sizeof(huffman_decode_node));
     while(1)
     {
-        if (some_var == 1276741472 || some_var == 1276741471 || some_var == 1276741470)
-            printf("%d-%x-%d-%d\n", some_var, in_buffer[i], position, bits_read);
         if (bits_read == 0)
         {
             c = in_buffer[i++];
-            some_var++;
             if (i == in_bytes_count)
             {
                 if (in_bytes_count != IN_BUFFER_SIZE)
                 {
-                    //printf("%d\n", hdt->tree[position].left);
-                    position = tree_search(hdt, (unsigned char *)(&in_buffer[i]), position, root, &bits_read);
-                    //printf("%d\n", hdt->tree[position].left);
+                    c = in_buffer[i];
+                    position = tree_search(hdt, (unsigned char *)(&c), position, root, &bits_read);
                     out_buffer[out_bytes_count++] = hdt->tree[position].symbol;
                     // Need to avoid "\ No newline at end of file" when compare with "diff" utility
                     //out_buffer[out_bytes_count++] = '\n';
-                    if (some_var == 1276741472 || some_var == 1276741471 || some_var == 1276741470)
-                        printf("%d-%x-%d-%d\n", some_var, in_buffer[i], position, bits_read);
                     fwrite(out_buffer, sizeof(int8_t), out_bytes_count, fout);
                     return;
                 }
@@ -38,8 +32,6 @@ void decode(huffman_decode_tree *hdt, FILE *fin, FILE *fout)
                 i = 0;
             }
         }
-        //if ((i == in_bytes_count - 1 || i == in_bytes_count - 2) && in_bytes_count != IN_BUFFER_SIZE)
-          //  printf("%d\n", in_buffer[i]);
         position = tree_search(hdt, (unsigned char *)(&c), position, root, &bits_read);
         if(hdt->tree[position].left == -1)
         {
